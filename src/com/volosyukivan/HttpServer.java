@@ -73,24 +73,32 @@ public class HttpServer extends Thread {
       sendKey(FOCUS, true);
       return;
     }
-    // Debug.d("got key event: " + req);
-    String[] ev = req.split("&");
-    for (int i = 1; i < ev.length; i++) {
-      String p[] = ev[i].split(",");
-      int seq = Integer.parseInt(p[0]);
-      int code = Integer.parseInt(p[1]);
-      boolean pressed = Integer.parseInt(p[2]) == 1;
-      if (seq <= seqNum) {
-        // Debug.d("skip " + (seqNum - seq));
-        i += seqNum - seq;
-        continue;
+    Debug.d("got key event: " + req);
+    try {
+      String[] ev = req.split(",");
+      int seq = Integer.parseInt(ev[0]);
+      int numKeysRequired = seq - seqNum;
+      if (numKeysRequired <= 0) return;
+      int numKeysAvailable = ev.length - 2;
+      int numKeys = Math.min(numKeysAvailable, numKeysRequired);
+      
+      for (int i = numKeys; i >= 1; i--) {
+        char mode = ev[i].charAt(0);
+        int code = Integer.parseInt(ev[i].substring(1));
+        if (mode == 'C') {
+          // FIXME: can be a problem with extended unicode characters
+          sendChar((char) code);
+        } else {
+          boolean pressed = mode == 'D';
+          sendKey(code, pressed);
+        }
       }
-      // Debug.d("code = " + code + " pressed = " + pressed);
-      sendKey(code, pressed);
       seqNum = seq;
     }
-    os.write("ok".getBytes("UTF-8"));
-    s.close();
+    finally {
+      os.write("ok".getBytes("UTF-8"));
+      s.close();
+    }
   }
   
   private void sendKey(final int code0, final boolean pressed) {
@@ -102,6 +110,21 @@ public class HttpServer extends Thread {
           // Debug.d("key going to listener");
           if (service.listener != null)
             service.listener.keyEvent(code, pressed);
+        } catch (RemoteException e) {
+          Debug.e("Exception on input method side, ignore", e);
+        }
+      }
+    });
+  }
+  
+  private void sendChar(final char code) {
+    handler.post(new Runnable() {
+      @Override
+      public void run() {
+        try {
+          // Debug.d("key going to listener");
+          if (service.listener != null)
+            service.listener.charEvent(code);
         } catch (RemoteException e) {
           Debug.e("Exception on input method side, ignore", e);
         }

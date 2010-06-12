@@ -3,18 +3,17 @@
   <title>WiFi Keyboard</title>
   <script language="JavaScript">
     // format: /seq,code,press/5012,32,1/
-    data = "&";
+    data = "";
     seq = 12345;
-    function key(code, down) {
-      var letter;
-      if (down) {
-        letter = "1";
-        } else {
-        letter = "0";
-      }
-      data = data + seq + "," + code + "," + letter + "&";
+    function send(code, mode) {
+      data = mode + code + "," + data;
+
+//      var el = document.getElementById("keys");
+//      el.appendChild(document.createTextNode(mode + code + " "));
+
+      if (1) {
       seq = seq + 1;
-      if (data.length > 200) data = data.substring(data.length - 200, data.length);
+      if (data.length > 200) data = data.substring(0, 200);
       xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function() {
     	  if (xhr.readyState == 4)
@@ -26,31 +25,50 @@
     	    // Wait...
     	  }
       }
-      xhr.open('GET', "/" + data, true);                  
+      xhr.open('GET', "/" + seq + "," + data, true);                  
       xhr.send(null);
-      // var el = document.getElementById("keys");
-      // el.appendChild(document.createTextNode(code + " "));
+      }
+    }
+
+    function compat() {
+      return !document.f.mode[0].checked;
+    }
+
+    function is_special(code) {
+      if (code <= 40) {
+        if (code >= 33) return true;
+	if (code == 8 || code == 9 || code == 13 || code == 27) return true;
+	if (code >= 16 && code <= 20) return true;
+      } else {
+        if (code == 42 || code == 45 || code == 46 || code == 93 || code == 145) return true;
+	if (code >= 112 && code <= 123) return true;
+      }
+      return false;
+    }
+    function keyevent(key, mode) {
+      if (compat()) {
+        send(key, mode);
+	return false;
+      }
+      if (is_special(key)) {
+        send(key, mode);
+	return false;
+      }
+      return true;
     }
     function up(e) {
       if (!e) e = window.event;
-      var code;
-      if ((e.charCode) && (e.keyCode==0)) {
-        code = e.charCode
-        } else {
-        code = e.keyCode;
-      }
-      key(code, 0);
-      return false;
+      return keyevent(e.keyCode, 'U');
     }
     function down(e) {
       if (!e) e = window.event;
-      var code;
-      if ((e.charCode) && (e.keyCode==0)) {
-        code = e.charCode
-        } else {
-        code = e.keyCode;
-      }
-      key(code, 1);
+      return keyevent(e.keyCode, 'D');
+    }
+    function press(e) {
+      if (!e) e = window.event;
+      if (compat()) return false;
+      if (e.charCode == 0) return false;
+      send(e.charCode, 'C');
       return false;
     }
     function focus_me() {
@@ -60,9 +78,15 @@
 <body id="myBody"
    onkeydown="return down(event);"
    onkeyup="return up(event);"
-   onblur="key(1024,'D');" onfocus="focus_me();"onload="focus_me(); key(1024, 'D');">
-  <h2>Android keyboard, type in text field and look at your android</h2>
-  <input id="in" type="text" value="Type here to type on android">
+   onkeypress="return press(event);"
+   onblur="send(1024,'D');" onfocus="focus_me();"onload="focus_me(); send(1024, 'D');">
+  <center<h2>Android keyboard</h2></center>
+  Type in text field and look at your android<br>
+  <form name="f">
+  <input type="radio" name="mode" value="i" checked>International keyboard<br>
+  <input type="radio" name="mode" value="c">Game mode (key codes only)<br>
+  <input id="in" type="text" value="Type here to type on android" style="width:100%">
+  </form>
   <h3>Tested on Chrome and Firefox. Special keys:</h3>
   <ul>
   <li>Ctrl = Ctrl</li>
@@ -73,6 +97,6 @@
   <li>Escape = BACK</li>
   <li>F9, F10 = Volume control</li>
   </ul>
-  <!-- <div id="keys">Debug: key presses:</div> -->
+<!-- <div id="keys">Debug: key presses:</div> -->
 </body>
 </html>

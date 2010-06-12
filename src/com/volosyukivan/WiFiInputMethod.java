@@ -35,6 +35,11 @@ public class WiFiInputMethod extends InputMethodService {
                 // Debug.d("got key in WiFiInputMethod");
                 receivedKey(code, pressed);
               }
+              @Override
+              public void charEvent(char code) throws RemoteException {
+                // Debug.d("got key in WiFiInputMethod");
+                receivedChar(code);
+              }
             });
       } catch (RemoteException e) {
         throw new RuntimeException(
@@ -48,6 +53,16 @@ public class WiFiInputMethod extends InputMethodService {
   };
   
   HashSet<Integer> pressedKeys = new HashSet<Integer>();
+  
+  void receivedChar(char code) {
+    InputConnection conn = getCurrentInputConnection();
+    if (conn == null) {
+      Debug.d("connection closed");
+      return;
+    }
+    String text = new String(new char[] { code } );
+    conn.commitText(text, 1);
+  }
   
   void receivedKey(int code, boolean pressed) {
     if (code == HttpServer.FOCUS) {
