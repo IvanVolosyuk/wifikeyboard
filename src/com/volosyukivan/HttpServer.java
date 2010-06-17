@@ -73,7 +73,7 @@ public class HttpServer extends Thread {
       sendKey(FOCUS, true);
       return;
     }
-    Debug.d("got key event: " + req);
+//    Debug.d("got key event: " + req);
     try {
       String[] ev = req.split(",");
       int seq = Integer.parseInt(ev[0]);
