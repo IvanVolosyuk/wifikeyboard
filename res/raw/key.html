@@ -23,10 +23,14 @@
           stat["color"] = "red";
           comment.innerHTML = "No connection between the phone and computer.";
         } else {
-          if (xhr.responseText != "ok") {
+          if (xhr.responseText == "problem") {
             stat.innerHTML = "Not typing";
             stat["color"] = "red";
           comment.innerHTML = 'Enable WiFiKeyboard input on you device. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings">Visit help page.</a>';
+          } else if (xhr.responseText == "multi") {
+            stat.innerHTML = "Mutiple input";
+            stat["color"] = "red";
+            comment.innerHTML = "Typing from multiple browser windows is not supported. Use one browser window.";
           } else {
             stat.innerHTML = "Connected";
             stat["color"] = "green";

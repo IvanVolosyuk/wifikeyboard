@@ -62,14 +62,13 @@ public class HttpServer extends Thread {
         ("HTTP/1.0 200 OK\n" +
         "Content-Type: image/gif\n\n")
         .getBytes());
-    InputStream is2 = service.getResources().openRawResource(R.raw.bg);
+    InputStream is2 = service.getResources().openRawResource(resid);
     byte[] image = new byte[10240];
     os.write(image, 0, is2.read(image));
   }
 
   private void processHttpRequest(Socket s) throws IOException {
     // Debug.d("got request");
-    boolean success = true;
     InputStream is = s.getInputStream();
     String req = httpRequestParser.getRequest(is);
     OutputStream os = s.getOutputStream();
@@ -85,7 +84,7 @@ public class HttpServer extends Thread {
       byte[] bytes = page.getBytes();
       os.write(bytes, 0, bytes.length);
       s.close();
-      success = success && sendKey(FOCUS, true);
+      sendKey(FOCUS, true);
       return;
     }
     
@@ -101,6 +100,9 @@ public class HttpServer extends Thread {
       s.close();
       return;
     }
+    
+    boolean success = true;
+    boolean event = false;
     
     try {
       String[] ev = req.split(",");
@@ -121,14 +123,20 @@ public class HttpServer extends Thread {
           boolean pressed = mode == 'D';
           success = success && sendKey(code, pressed);
         }
+        event = true;
       }
       seqNum = seq;
     }
     finally {
-      if (success) {
+      if (!event) {
+        os.write("multi".getBytes("UTF-8"));
+        Debug.d("multi");
+      } else if (success) {
         os.write("ok".getBytes("UTF-8"));
+        Debug.d("ok");
       } else {
         os.write("problem".getBytes("UTF-8"));
+        Debug.d("problem");
       }
       s.close();
     }
