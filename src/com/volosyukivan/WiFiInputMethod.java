@@ -24,12 +24,14 @@ public class WiFiInputMethod extends InputMethodService {
   public void onDestroy() {
     Debug.d("WiFiInputMethod onDestroy()");
     try {
-      removeKeyboard.unregisterKeyListener(keyboardListener);
+      if (removeKeyboard != null)
+        removeKeyboard.unregisterKeyListener(keyboardListener);
     } catch (RemoteException e) {
       Debug.d("Failed to unregister listener");
     }
     removeKeyboard = null;
-    unbindService(serviceConnection);
+    if (serviceConnection != null)
+      unbindService(serviceConnection);
     serviceConnection = null;
     super.onDestroy();
   }
@@ -97,6 +99,7 @@ public class WiFiInputMethod extends InputMethodService {
         sendKey(key, false, false);
       }
       pressedKeys.clear();
+      resetModifiers();
       return;
     }
     if (pressedKeys.contains(code) == pressed) {
@@ -116,6 +119,12 @@ public class WiFiInputMethod extends InputMethodService {
       pressedKeys.remove(code);
       sendKey(code, pressed, pressedKeys.isEmpty());
     }
+  }
+  
+  void resetModifiers() {
+    InputConnection conn = getCurrentInputConnection();
+    conn.clearMetaKeyStates(
+        KeyEvent.META_ALT_ON | KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON);
   }
   
   void sendKey(int code, boolean down, boolean resetModifiers) {

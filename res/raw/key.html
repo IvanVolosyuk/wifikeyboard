@@ -2,14 +2,28 @@
 <head>
   <title>WiFi Keyboard</title>
   <script language="JavaScript">
+
+   if (typeof XMLHttpRequest == "undefined")
+     XMLHttpRequest = function () {
+       try { return new ActiveXObject("Msxml2.XMLHTTP.6.0"); }
+       catch (e) {}
+       try { return new ActiveXObject("Msxml2.XMLHTTP.3.0"); }
+       catch (e) {}
+       try { return new ActiveXObject("Msxml2.XMLHTTP"); }
+       catch (e) {}
+       //Microsoft.XMLHTTP points to Msxml2.XMLHTTP.3.0 and is redundant
+       throw new Error("This browser does not support XMLHttpRequest.");
+   };
+
     // format: /seq,code,press/5012,32,1/
     data = "";
     seq = 12345;
+    ignore_next_char = false;
     function send(code, mode) {
       data = mode + code + "," + data;
 
 //      var el = document.getElementById("keys");
-//      el.appendChild(document.createTextNode(mode + code + " "));
+//      el.innerHTML = el.innerHTML + mode + code + " ";
 
       if (1) {
       seq = seq + 1;
@@ -59,14 +73,18 @@
       return false;
     }
     function keyevent(key, mode) {
+      repeat_key_code = key;
       if (compat()) {
+        ignore_next_char = mode == 'D';
         send(key, mode);
 	return false;
       }
       if (is_special(key)) {
+        ignore_next_char = mode == 'D';
         send(key, mode);
 	return false;
       }
+      ignore_next_char = false;
       return true;
     }
     function up(e) {
@@ -78,10 +96,23 @@
       return keyevent(e.keyCode, 'D');
     }
     function press(e) {
+      if (ignore_next_char) {
+         ignore_next_char = false;
+         return false;
+      }
       if (!e) e = window.event;
       if (compat()) return false;
-      if (e.charCode == 0) return false;
-      send(e.charCode, 'C');
+      if (e.charCode != undefined) {
+        ch = e.charCode;
+      } else {
+        ch = e.keyCode;
+      }
+      // firefox and opera hack
+      if (ch == 0 || ch == repeat_key_code) {
+        send(repeat_key_code, 'D');
+        return false;
+      }
+      send(ch, 'C');
       return false;
     }
     function focus_me() {

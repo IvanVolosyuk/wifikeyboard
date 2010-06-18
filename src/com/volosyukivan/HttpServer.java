@@ -105,11 +105,11 @@ public class HttpServer extends Thread {
     boolean event = false;
     
     try {
-      String[] ev = req.split(",");
+      String[] ev = req.split(",", -1);
       int seq = Integer.parseInt(ev[0]);
       int numKeysRequired = seq - seqNum;
       if (numKeysRequired <= 0) return;
-      int numKeysAvailable = ev.length - 1;
+      int numKeysAvailable = ev.length - 2;
       int numKeys = Math.min(numKeysAvailable, numKeysRequired);
       
       for (int i = numKeys; i >= 1; i--) {
