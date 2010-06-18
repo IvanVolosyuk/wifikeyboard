@@ -16,14 +16,23 @@
       if (data.length > 200) data = data.substring(0, 200);
       xhr = new XMLHttpRequest();
       xhr.onreadystatechange = function() {
-    	  if (xhr.readyState == 4)
-    	  {
-    	     // Received, OK
-       	  el.appendChild(document.createTextNode("ok "));
-    	  } else 
-    	  {
-    	    // Wait...
-    	  }
+	if (xhr.readyState != 4) return;
+        stat = document.getElementById("status");
+        if (xhr.status != 200) {
+          stat.innerHTML = "Connection problem";
+          stat["color"] = "red";
+          comment.innerHTML = "No connection between the phone and computer.";
+        } else {
+          if (xhr.responseText != "ok") {
+            stat.innerHTML = "Not typing";
+            stat["color"] = "red";
+          comment.innerHTML = 'Enable WiFiKeyboard input on you device. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings">Visit help page.</a>';
+          } else {
+            stat.innerHTML = "Connected";
+            stat["color"] = "green";
+            comment.innerHTML = "You can type now.";
+          }
+        }
       }
       xhr.open('GET', "/" + seq + "," + data, true);                  
       xhr.send(null);
@@ -74,22 +83,90 @@
     function focus_me() {
       document.getElementById("in").focus();
     }
-</script></head>
+
+    function loadFinished() {
+      send(1024, 'D');
+    }
+    window.onload = loadFinished;
+</script>
+<link href='http://fonts.googleapis.com/css?family=Cantal' rel='stylesheet' type='text/css'>
+<link href=' http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz' rel='stylesheet' type='text/css'>
+<link href=' http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>
+<link rel="icon" type="image/png" href="/icon.png" />
+<style type="text/css">
+   h1 {
+    font-family: 'Cantal', arial, serif;
+    font-size: 350%;
+   } 
+   h2 {
+    font-family: 'Yanone Kaffeesatz', arial, serif; 
+    font-size: 180%;
+   }
+   div {
+    font-family: 'Droid Sans', arial, serif;
+    font-size: 150%;
+    padding: 3pt;
+   }
+
+   div.footer {
+    font-family: arial, serif;
+    font-size: 100%;
+    text-align: right;
+   }
+   body {
+    color:#000000;
+    background-color:#f1f1ed;
+    margin:0px;
+    overflow:auto;
+   }
+   table.main {
+     width:800px;
+     margin-top:0px;
+     margin-bottom:0px;
+     background-color:#ffffff;
+     padding:15px;
+     background-image:url('bg.gif');
+     background-repeat:repeat-x;
+     height: 100%;
+   }
+</style>
+</head>
 <body id="myBody"
    onkeydown="return down(event);"
    onkeyup="return up(event);"
    onkeypress="return press(event);"
    onblur="send(1024,'D');" onfocus="focus_me();"onload="focus_me(); send(1024, 'D');">
-  <center<h2>Android keyboard</h2></center>
-  Type in text field and look at your android<br>
+<table class="main" align="center">
+<tbody>
+<tr valign="top">
+<td class="main">
+<!-- Main Window -->
+<h1>WiFi&nbsp;Keyboard</h1>
+  <h2>Android input:
+  <input id="in" type="text" value="Text typed here goes to android device." style="width:100%">
+  </h2>
+
+  <table border="0"><tbody><tr><td cellspacing="50" cellpadding="50">
   <form name="f">
-  <input type="radio" name="mode" value="i" checked>International keyboard<br>
-  <input type="radio" name="mode" value="c">Game mode (key codes only)<br>
-  <input id="in" type="text" value="Type here to type on android" style="width:100%">
+  <h2>Keyboard mode:</h2>
+  <div class="mode"><input type="radio" name="mode" value="i" checked>International keyboard</div>
+  <div class="mode"><input type="radio" name="mode" value="c">Game mode (key codes only)</div>
   </form>
-  <h3>Tested on Chrome and Firefox. Special keys:</h3>
+  </td></tr></tbody></table>
+
+<!-- Main Window End -->
+</td><td align="right">
+<!-- Side bar -->
+  <table border="1" cellpadding="20"><tbody><tr><td cellspacing="50" cellpadding="50">
+  <h2>Status: <font color="black" id="status">Connecting...</font></h2>
+  <div id="comment"></div>
+  </td></tr></tbody></table>
+
+  <br>
+  <table border="0"><tbody><tr><td cellspacing="50" cellpadding="50">
+  <h2>Special keys:</h2>
   <ul>
-  <li>Ctrl = Ctrl</li>
+  <li>Shift = Shift</li>
   <li>Alt = Alt</li>
   <li>Arrows = DPAD Arrows</li>
   <li>Insert or F1 = DPAD Center</li>
@@ -97,6 +174,17 @@
   <li>Escape = BACK</li>
   <li>F9, F10 = Volume control</li>
   </ul>
+  </td></tr></tbody></table>
+<!-- Side bar end -->
+</td>
+</tr>
+<tr valign="bottom">
+<td colspan="2">
+  <div class="footer"><a href="http://code.google.com/p/wifikeyboard/">Source code available (license GPL v2).</a><br>Created by Ivan Volosyuk on 2010.</div>
 <!-- <div id="keys">Debug: key presses:</div> -->
+<td>
+</tr>
+</tbody>
+</table>
 </body>
 </html>

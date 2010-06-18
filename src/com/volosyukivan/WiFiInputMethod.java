@@ -2,6 +2,8 @@ package com.volosyukivan;
 
 import java.util.HashSet;
 
+import com.volosyukivan.RemoteKeyListener.Stub;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -14,6 +16,23 @@ import android.view.KeyEvent;
 import android.view.inputmethod.InputConnection;
 
 public class WiFiInputMethod extends InputMethodService {
+  ServiceConnection serviceConnection;
+  private RemoteKeyboard removeKeyboard;
+  protected Stub keyboardListener;
+
+  @Override
+  public void onDestroy() {
+    Debug.d("WiFiInputMethod onDestroy()");
+    try {
+      removeKeyboard.unregisterKeyListener(keyboardListener);
+    } catch (RemoteException e) {
+      Debug.d("Failed to unregister listener");
+    }
+    removeKeyboard = null;
+    unbindService(serviceConnection);
+    serviceConnection = null;
+    super.onDestroy();
+  }
 
   PowerManager.WakeLock wakeLock;
   HashSet<Integer> pressedKeys = new HashSet<Integer>();
@@ -25,25 +44,25 @@ public class WiFiInputMethod extends InputMethodService {
     wakeLock = pm.newWakeLock(
         PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, "wifikeyboard");
     Debug.d("WiFiInputMethod started");
-    if (this.bindService(new Intent(this, HttpService.class),
-        new ServiceConnection() {
+    serviceConnection = new ServiceConnection() {
       //@Override
       public void onServiceConnected(ComponentName name, IBinder service) {
         Debug.d("WiFiInputMethod connected to HttpService.");
         try {
-          RemoteKeyboard.Stub.asInterface(service).registerKeyListener(
-              new RemoteKeyListener.Stub() {
-                @Override
-                public void keyEvent(int code, boolean pressed) throws RemoteException {
-                  // Debug.d("got key in WiFiInputMethod");
-                  receivedKey(code, pressed);
-                }
-                @Override
-                public void charEvent(char code) throws RemoteException {
-                  // Debug.d("got key in WiFiInputMethod");
-                  receivedChar(code);
-                }
-              });
+          removeKeyboard = RemoteKeyboard.Stub.asInterface(service);
+          keyboardListener = new RemoteKeyListener.Stub() {
+            @Override
+            public void keyEvent(int code, boolean pressed) throws RemoteException {
+              // Debug.d("got key in WiFiInputMethod");
+              receivedKey(code, pressed);
+            }
+            @Override
+            public void charEvent(char code) throws RemoteException {
+              // Debug.d("got key in WiFiInputMethod");
+              receivedChar(code);
+            }
+          };
+          RemoteKeyboard.Stub.asInterface(service).registerKeyListener(keyboardListener);
         } catch (RemoteException e) {
           throw new RuntimeException(
               "WiFiInputMethod failed to connected to HttpService.", e);
@@ -53,7 +72,9 @@ public class WiFiInputMethod extends InputMethodService {
       public void onServiceDisconnected(ComponentName name) {
         Debug.d("WiFiInputMethod disconnected from HttpService.");
       }
-    }, BIND_AUTO_CREATE) == false) {
+    }; 
+    if (this.bindService(new Intent(this, HttpService.class),
+        serviceConnection, BIND_AUTO_CREATE) == false) {
       throw new RuntimeException("failed to connect to HttpService");
     }
   }

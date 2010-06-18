@@ -12,6 +12,7 @@ import android.os.RemoteException;
 public class HttpService extends Service {
   RemoteKeyListener listener;
   String htmlpage;
+  int port;
 
   final IBinder mBinder = new RemoteKeyboard.Stub() {
     //@Override
@@ -19,19 +20,50 @@ public class HttpService extends Service {
         throws RemoteException {
       HttpService.this.listener = listener;
     }
+    //@Override
+    public void unregisterKeyListener(final RemoteKeyListener listener)
+        throws RemoteException {
+      if (HttpService.this.listener == listener) {
+        HttpService.this.listener = null;
+        Debug.d("Removed listener");
+      }
+    }
+
+    @Override
+    public int getPort() throws RemoteException {
+      return port;
+    }
   };
+  
+  private ServerSocket makeSocket() {
+    try {
+      return new ServerSocket(7777, 10);
+    } catch (IOException e) {}
+    
+    for (int i = 1; i < 9; i++) {
+      try {
+        return new ServerSocket(i * 1111, 10);
+      } catch (IOException e) {}
+    }
+    for (int i = 2; i < 64; i++) {
+      try {
+        return new ServerSocket(i * 1000, 10);
+      } catch (IOException e) {}
+    }
+    try {
+      return new ServerSocket(7777, 10);
+    } catch (Throwable t) {
+      throw new RuntimeException(t);
+    }
+  }
   
   @Override
   public void onCreate() {
     super.onCreate();
     Debug.d("HttpService started");
 
-    ServerSocket socket;
-    try {
-      socket = new ServerSocket(7777, 10);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    ServerSocket socket = makeSocket();
+    port = socket.getLocalPort();
     server = new HttpServer(this, socket);
     InputStream is = getResources().openRawResource(R.raw.key);
     int pagesize = 32768;
@@ -59,7 +91,7 @@ public class HttpService extends Service {
   }
 
   @Override
-  public IBinder onBind(Intent arg0) {
+  public IBinder onBind(Intent intent) {
     return mBinder;
   }
   

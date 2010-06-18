@@ -19,6 +19,8 @@ public class HttpServer extends Thread {
   static final int FOCUS = 1024;
   private boolean isDone;
   private int seqNum = 0;
+  private boolean connected;
+  private boolean delivered;
 
   HttpServer(HttpService service, ServerSocket socket) {
     this.service = service;
@@ -54,12 +56,25 @@ public class HttpServer extends Thread {
   public synchronized void finish() {
     isDone = true;
   }
+  
+  public void sendImage(OutputStream os, int resid) throws IOException {
+    os.write(
+        ("HTTP/1.0 200 OK\n" +
+        "Content-Type: image/gif\n\n")
+        .getBytes());
+    InputStream is2 = service.getResources().openRawResource(R.raw.bg);
+    byte[] image = new byte[10240];
+    os.write(image, 0, is2.read(image));
+  }
 
   private void processHttpRequest(Socket s) throws IOException {
     // Debug.d("got request");
+    boolean success = true;
     InputStream is = s.getInputStream();
     String req = httpRequestParser.getRequest(is);
     OutputStream os = s.getOutputStream();
+    Debug.d("got key event: " + req);
+    
     if (req.equals("")) {
       Debug.d("sending html page");
       os.write(
@@ -70,68 +85,114 @@ public class HttpServer extends Thread {
       byte[] bytes = page.getBytes();
       os.write(bytes, 0, bytes.length);
       s.close();
-      sendKey(FOCUS, true);
+      success = success && sendKey(FOCUS, true);
       return;
     }
-//    Debug.d("got key event: " + req);
+    
+    
+    if (req.equals("bg.gif")) {
+      sendImage(os, R.raw.bg);
+      s.close();
+      return;
+    }
+
+    if (req.equals("icon.png")) {
+      sendImage(os, R.raw.icon);
+      s.close();
+      return;
+    }
+    
     try {
       String[] ev = req.split(",");
       int seq = Integer.parseInt(ev[0]);
       int numKeysRequired = seq - seqNum;
       if (numKeysRequired <= 0) return;
-      int numKeysAvailable = ev.length - 2;
+      int numKeysAvailable = ev.length - 1;
       int numKeys = Math.min(numKeysAvailable, numKeysRequired);
       
       for (int i = numKeys; i >= 1; i--) {
+        Debug.d("Event: " + ev[i]);
         char mode = ev[i].charAt(0);
         int code = Integer.parseInt(ev[i].substring(1));
         if (mode == 'C') {
           // FIXME: can be a problem with extended unicode characters
-          sendChar((char) code);
+          success = success && sendChar((char) code);
         } else {
           boolean pressed = mode == 'D';
-          sendKey(code, pressed);
+          success = success && sendKey(code, pressed);
         }
       }
       seqNum = seq;
     }
     finally {
-      os.write("ok".getBytes("UTF-8"));
+      if (success) {
+        os.write("ok".getBytes("UTF-8"));
+      } else {
+        os.write("problem".getBytes("UTF-8"));
+      }
       s.close();
     }
   }
   
-  private void sendKey(final int code0, final boolean pressed) {
+  private boolean sendKey(final int code0, final boolean pressed) {
+    delivered = false;
     final int code = convertKey(code0);
     handler.post(new Runnable() {
       @Override
       public void run() {
+        boolean connected0 = false;
         try {
           // Debug.d("key going to listener");
-          if (service.listener != null)
+          if (service.listener != null) {
             service.listener.keyEvent(code, pressed);
+            connected0 = true;
+          }
         } catch (RemoteException e) {
           Debug.e("Exception on input method side, ignore", e);
         }
+        notifyDelivered(connected0);
       }
     });
+    return waitNotifyDelivered();
   }
   
-  private void sendChar(final char code) {
+  private boolean sendChar(final char code) {
+    delivered = false;
     handler.post(new Runnable() {
       @Override
       public void run() {
+        boolean connected0 = false;
         try {
           // Debug.d("key going to listener");
-          if (service.listener != null)
+          if (service.listener != null) {
             service.listener.charEvent(code);
+            connected0 = true;
+          }
         } catch (RemoteException e) {
           Debug.e("Exception on input method side, ignore", e);
         }
+        notifyDelivered(connected0);
       }
     });
+    return waitNotifyDelivered();
   }
   
+  protected synchronized void notifyDelivered(boolean connected0) {
+    connected = connected0;
+    delivered = true;
+    notifyAll();
+  }
+  private synchronized boolean waitNotifyDelivered() {
+    while (!delivered) {
+      try {
+        wait();
+      } catch (InterruptedException e) {
+        connected = false;
+      }
+    }
+    return connected;
+  }
+
   private int convertKey(int code) {
     // public static final int KEYCODE_A = 29;
     // ...
