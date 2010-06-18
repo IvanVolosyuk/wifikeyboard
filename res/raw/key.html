@@ -19,6 +19,7 @@
     data = "";
     seq = 12345;
     ignore_next_char = false;
+    repeat_key_code = "-1";
     function send(code, mode) {
       data = mode + code + "," + data;
 
@@ -73,14 +74,15 @@
       return false;
     }
     function keyevent(key, mode) {
-      repeat_key_code = key;
       if (compat()) {
         ignore_next_char = mode == 'D';
+        repeat_key_code = key;
         send(key, mode);
 	return false;
       }
       if (is_special(key)) {
         ignore_next_char = mode == 'D';
+        repeat_key_code = key;
         send(key, mode);
 	return false;
       }
