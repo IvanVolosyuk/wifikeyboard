@@ -35,7 +35,11 @@ public class HttpServer extends Thread {
     while (!isDone()) {
       try {
         Socket s = socket.accept();
-        processHttpRequest(s);
+        try {
+          processHttpRequest(s);
+        } finally {
+          s.close();
+        }
       } catch (IOException e) {
         Debug.e("request failed", e);
       } catch (NumberFormatException e) {
@@ -83,7 +87,6 @@ public class HttpServer extends Thread {
       String page = service.htmlpage.replace("12345", Integer.toString(seqNum + 1));
       byte[] bytes = page.getBytes();
       os.write(bytes, 0, bytes.length);
-      s.close();
       sendKey(FOCUS, true);
       return;
     }
@@ -91,54 +94,47 @@ public class HttpServer extends Thread {
     
     if (req.equals("bg.gif")) {
       sendImage(os, R.raw.bg);
-      s.close();
       return;
     }
 
     if (req.equals("icon.png")) {
       sendImage(os, R.raw.icon);
-      s.close();
       return;
     }
     
     boolean success = true;
     boolean event = false;
-    
-    try {
-      String[] ev = req.split(",", -1);
-      int seq = Integer.parseInt(ev[0]);
-      int numKeysRequired = seq - seqNum;
-      if (numKeysRequired <= 0) return;
-      int numKeysAvailable = ev.length - 2;
-      int numKeys = Math.min(numKeysAvailable, numKeysRequired);
-      
-      for (int i = numKeys; i >= 1; i--) {
-        Debug.d("Event: " + ev[i]);
-        char mode = ev[i].charAt(0);
-        int code = Integer.parseInt(ev[i].substring(1));
-        if (mode == 'C') {
-          // FIXME: can be a problem with extended unicode characters
-          success = success && sendChar((char) code);
-        } else {
-          boolean pressed = mode == 'D';
-          success = success && sendKey(code, pressed);
-        }
-        event = true;
-      }
-      seqNum = seq;
-    }
-    finally {
-      if (!event) {
-        os.write("multi".getBytes("UTF-8"));
-        Debug.d("multi");
-      } else if (success) {
-        os.write("ok".getBytes("UTF-8"));
-        Debug.d("ok");
+
+    String[] ev = req.split(",", -1);
+    int seq = Integer.parseInt(ev[0]);
+    int numKeysRequired = seq - seqNum;
+    if (numKeysRequired <= 0) return;
+    int numKeysAvailable = ev.length - 2;
+    int numKeys = Math.min(numKeysAvailable, numKeysRequired);
+
+    for (int i = numKeys; i >= 1; i--) {
+      Debug.d("Event: " + ev[i]);
+      char mode = ev[i].charAt(0);
+      int code = Integer.parseInt(ev[i].substring(1));
+      if (mode == 'C') {
+        // FIXME: can be a problem with extended unicode characters
+        success = success && sendChar(code);
       } else {
-        os.write("problem".getBytes("UTF-8"));
-        Debug.d("problem");
+        boolean pressed = mode == 'D';
+        success = success && sendKey(code, pressed);
       }
-      s.close();
+      event = true;
+    }
+    seqNum = seq;
+    if (!event) {
+      os.write("multi".getBytes("UTF-8"));
+      Debug.d("multi");
+    } else if (success) {
+      os.write("ok".getBytes("UTF-8"));
+      Debug.d("ok");
+    } else {
+      os.write("problem".getBytes("UTF-8"));
+      Debug.d("problem");
     }
   }
   
@@ -164,7 +160,7 @@ public class HttpServer extends Thread {
     return waitNotifyDelivered();
   }
   
-  private boolean sendChar(final char code) {
+  private boolean sendChar(final int code) {
     delivered = false;
     handler.post(new Runnable() {
       @Override

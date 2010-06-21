@@ -13,6 +13,7 @@ public class HttpService extends Service {
   RemoteKeyListener listener;
   String htmlpage;
   int port;
+  ServerSocket socket;
 
   final IBinder mBinder = new RemoteKeyboard.Stub() {
     //@Override
@@ -62,7 +63,7 @@ public class HttpService extends Service {
     super.onCreate();
     Debug.d("HttpService started");
 
-    ServerSocket socket = makeSocket();
+    socket = makeSocket();
     port = socket.getLocalPort();
     server = new HttpServer(this, socket);
     InputStream is = getResources().openRawResource(R.raw.key);
@@ -86,8 +87,12 @@ public class HttpService extends Service {
   
   @Override
   public void onDestroy() {
-    super.onDestroy();
     server.finish();
+    try {
+      socket.close();
+    } catch (IOException e) {
+    }
+    super.onDestroy();
   }
 
   @Override

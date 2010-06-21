@@ -59,7 +59,7 @@ public class WiFiInputMethod extends InputMethodService {
               receivedKey(code, pressed);
             }
             @Override
-            public void charEvent(char code) throws RemoteException {
+            public void charEvent(int code) throws RemoteException {
               // Debug.d("got key in WiFiInputMethod");
               receivedChar(code);
             }
@@ -81,7 +81,7 @@ public class WiFiInputMethod extends InputMethodService {
     }
   }
   
-  void receivedChar(char code) {
+  void receivedChar(int code) {
     wakeLock.acquire();
     wakeLock.release();
     InputConnection conn = getCurrentInputConnection();
@@ -89,7 +89,16 @@ public class WiFiInputMethod extends InputMethodService {
       Debug.d("connection closed");
       return;
     }
-    String text = new String(new char[] { code } );
+    String text = null; 
+    if (code >= 0 && code <= 65535) {
+      text = new String(new char[] { (char) code } );
+    } else {
+      int HI_SURROGATE_START = 0xD800;
+      int LO_SURROGATE_START = 0xDC00;
+      int hi = ((code >> 10) & 0x3FF) - 0x040 | HI_SURROGATE_START;
+      int lo = LO_SURROGATE_START | (code & 0x3FF);
+      text = new String(new char[] { (char) hi, (char) lo } );
+    }
     conn.commitText(text, 1);
   }
   

@@ -33,6 +33,8 @@
       xhr.onreadystatechange = function() {
 	if (xhr.readyState != 4) return;
         stat = document.getElementById("status");
+        comment = document.getElementById("comment");
+
         if (xhr.status != 200) {
           stat.innerHTML = "Connection problem";
           stat["color"] = "red";
@@ -41,7 +43,7 @@
           if (xhr.responseText == "problem") {
             stat.innerHTML = "Not typing";
             stat["color"] = "red";
-          comment.innerHTML = 'Enable WiFiKeyboard input on you device. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings">Visit help page.</a>';
+            comment.innerHTML = 'Enable WiFiKeyboard input on you device. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings">Visit help page.</a>';
           } else if (xhr.responseText == "multi") {
             stat.innerHTML = "Mutiple input";
             stat["color"] = "red";
