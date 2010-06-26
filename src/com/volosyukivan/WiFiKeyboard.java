@@ -49,28 +49,28 @@ public class WiFiKeyboard extends Activity {
       layout.setOrientation(LinearLayout.VERTICAL);
       layout.setLayoutParams(new LinearLayout.LayoutParams(fill, wrap));
       parent.addView(layout);
-      text("Setting up WiFiKeyboard:", 20);
-      text("Go to Settings->Language & Keyboard");
-      text("Enable there WiFiKeyboard");
-      text("On any text input touch and hold for a second");
-      text("Change 'InputMethod' to 'WiFiKeyboard'");
-      text("");
+      text(R.string.desc_setup_wifi, 20);
+      text(R.string.desc_goto_settings);
+      text(R.string.desc_enable_kbd);
+      text(R.string.desc_toch_input_field);
+      text(R.string.desc_change_input_method);
+      text("", 15);
       if (addrs.size() == 0) {
         text("Enable wifi or GPRS/3G", 20);
       } else if (addrs.size() == 1) {
-        text("Connect your computer's browser to http://" + addrs.get(0) + ":" + port, 20);
+        text(getString(R.string.desc_connect_to_one, addrs.get(0), port), 20);
       } else {
-        text("Connect your computer's browser to any of:");
+        text(R.string.desc_connect_to_any);
         for (String addr : addrs) {
           text("http://" + addr + ":" + port, 20);
         }
       }
-      text("This will only work if you did previous steps and your phone is visible from your computer.");
-      text("");
-      text("Alternatively you can use usb cable to connect to your computer", 20);
-      text("You need 'adb' command from android SDK");
-      text("Type 'adb forward tcp:" + port + " tcp:" + port + "' in command line");
-      text("And connect your computer's browser to http://localhost:" + port);
+      text(R.string.desc_warn);
+      text("", 15);
+      text(R.string.desc_alt_usb_cable, 20);
+      text(R.string.desc_adb_from_sdk);
+      text(getString(R.string.desc_cmdline, port, port), 15);
+      text(getString(R.string.desc_connect_local, port), 15);
       return parent;
     }
     
@@ -104,8 +104,13 @@ public class WiFiKeyboard extends Activity {
         setContentView(createView());
     }
     
-    private void text(String msg) {
-      text(msg, 15);
+    private void text(int resId) {
+      text(resId, 15);
+    }
+    
+    private void text(int resId, int fontSize) {
+      String msg = getString(resId);
+      text(msg, fontSize);
     }
     
     private void text(String msg, int fontSize) {

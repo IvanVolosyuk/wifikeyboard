@@ -47,6 +47,7 @@ public class HttpServer extends Thread {
       }
     }
     try {
+      Debug.d("Connection close");
       socket.close();
     } catch (IOException e) {
       Debug.e("closing listening socket", e);
@@ -74,68 +75,89 @@ public class HttpServer extends Thread {
   private void processHttpRequest(Socket s) throws IOException {
     // Debug.d("got request");
     InputStream is = s.getInputStream();
-    String req = httpRequestParser.getRequest(is);
     OutputStream os = s.getOutputStream();
-    Debug.d("got key event: " + req);
+    boolean newConnection = true;
     
-    if (req.equals("")) {
-      Debug.d("sending html page");
-      os.write(
-          ("HTTP/1.0 200 OK\n" +
-          "Content-Type: text/html; charset=ISO-8859-1\n\n")
-          .getBytes());
-      String page = service.htmlpage.replace("12345", Integer.toString(seqNum + 1));
-      byte[] bytes = page.getBytes();
-      os.write(bytes, 0, bytes.length);
-      sendKey(FOCUS, true);
-      return;
-    }
-    
-    
-    if (req.equals("bg.gif")) {
-      sendImage(os, R.raw.bg);
-      return;
-    }
-
-    if (req.equals("icon.png")) {
-      sendImage(os, R.raw.icon);
-      return;
-    }
-    
-    boolean success = true;
-    boolean event = false;
-
-    String[] ev = req.split(",", -1);
-    int seq = Integer.parseInt(ev[0]);
-    int numKeysRequired = seq - seqNum;
-    if (numKeysRequired <= 0) return;
-    int numKeysAvailable = ev.length - 2;
-    int numKeys = Math.min(numKeysAvailable, numKeysRequired);
-
-    for (int i = numKeys; i >= 1; i--) {
-      Debug.d("Event: " + ev[i]);
-      char mode = ev[i].charAt(0);
-      int code = Integer.parseInt(ev[i].substring(1));
-      if (mode == 'C') {
-        // FIXME: can be a problem with extended unicode characters
-        success = success && sendChar(code);
-      } else {
-        boolean pressed = mode == 'D';
-        success = success && sendKey(code, pressed);
+    while (true) {
+      String req = httpRequestParser.getRequest(is);
+      Debug.d("got key event: " + req);
+      
+      if (!newConnection) {
+        Debug.d("keep alive!");
       }
-      event = true;
+      newConnection = false;
+//      try {
+//        Thread.sleep(1000);
+//      } catch (InterruptedException e) {
+//        // TODO Auto-generated catch block
+//        e.printStackTrace();
+//      }
+
+      if (req.equals("")) {
+        Debug.d("sending html page");
+        os.write(
+            ("HTTP/1.0 200 OK\n" +
+            "Content-Type: text/html; charset=UTF-8\n\n")
+            .getBytes());
+        String page = service.htmlpage.replace("12345", Integer.toString(seqNum + 1));
+        byte[] bytes = page.getBytes();
+        os.write(bytes, 0, bytes.length);
+        sendKey(FOCUS, true);
+        return;
+      }
+
+
+      if (req.equals("bg.gif")) {
+        sendImage(os, R.raw.bg);
+        return;
+      }
+
+      if (req.equals("icon.png")) {
+        sendImage(os, R.raw.icon);
+        return;
+      }
+
+      boolean success = true;
+      boolean event = false;
+
+      String[] ev = req.split(",", -1);
+      int seq = Integer.parseInt(ev[0]);
+      int numKeysRequired = seq - seqNum;
+      if (numKeysRequired <= 0) return;
+      int numKeysAvailable = ev.length - 2;
+      int numKeys = Math.min(numKeysAvailable, numKeysRequired);
+
+      for (int i = numKeys; i >= 1; i--) {
+        Debug.d("Event: " + ev[i]);
+        char mode = ev[i].charAt(0);
+        int code = Integer.parseInt(ev[i].substring(1));
+        if (mode == 'C') {
+          // FIXME: can be a problem with extended unicode characters
+          success = success && sendChar(code);
+        } else {
+          boolean pressed = mode == 'D';
+          success = success && sendKey(code, pressed);
+        }
+        event = true;
+      }
+      seqNum = seq;
+      if (!event) {
+        response(os, "multi");
+      } else if (success) {
+        response(os, "ok");
+      } else {
+        response(os, "problem");
+      }
     }
-    seqNum = seq;
-    if (!event) {
-      os.write("multi".getBytes("UTF-8"));
-      Debug.d("multi");
-    } else if (success) {
-      os.write("ok".getBytes("UTF-8"));
-      Debug.d("ok");
-    } else {
-      os.write("problem".getBytes("UTF-8"));
-      Debug.d("problem");
-    }
+  }
+  
+  private void response(OutputStream os, String val) throws IOException {
+    Debug.d(val);
+    os.write(String.format(
+        "HTTP/1.1 200 OK\n" +
+        "Content-Type: text/plain\n" +
+        "Content-Length: %d\n" +
+        "\n%s", val.length(), val).getBytes("UTF-8"));
   }
   
   private boolean sendKey(final int code0, final boolean pressed) {

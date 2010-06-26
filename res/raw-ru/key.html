@@ -17,93 +17,63 @@
    };
 
     // format: /seq,code,press/5012,32,1/
+    data = "";
+    seq = 12345;
     ignore_next_char = false;
     repeat_key_code = "-1";
+    in_progress = false;
+    need_update = false;
 
-    seqConfirmed = 12345;
-    seqPressed = seqConfirmed;
-    events=Object();
-    times=Object();
-    num_inflight = 0;
-
-
-    function onConfirm(newConfirmed) {
-      if (newConfirmed == seqPressed) {
-        events=Object();
-	times=Object();
+    function send(code, mode) {
+      data = mode + code + "," + data;
+      if (in_progress) {
+        need_update = true;
+        return;
       }
-      if (newConfirmed <= seqConfirmed) return;
-      for (i = seqConfirmed; i < newConfirmed; i++) {
-        events[i] = undefined;
-	times[i] = undefined;
-	seqConfirmed = newConfirmed;
-      }
+//      var el = document.getElementById("keys");
+//      el.innerHTML = el.innerHTML + mode + code + " ";
       network();
     }
 
-    function send(code, mode) {
-      ev = mode + code;
-      events[seqPressed] = ev;
-      times[seqPressed] = new Date().getTime();
-      seqPressed += 1
-//      var el = document.getElementById("keys");
-//      el.innerHTML = el.innerHTML + mode + code + " ";
-      network()
-    }
-
     function network() {
-      if (seqConfirmed == seqPressed) return;
-      if (num_inflight >= 1) return;
-
-      //seq = seq + 1;
-      //if (data.length > 200) data = data.substring(0, 200);
-
-      charsToTransmit = seqPressed - seqConfirmed;
-      if (charsToTransmit > 100) charsToTransmit = 100;
-      data = events[seqConfirmed] + ",";
-      newConfirmed = seqConfirmed + charsToTransmit;
-      for (i = seqConfirmed + 1; i < newConfirmed; i++) {
-        data = events[i] + "," + data;
-      }
-
+      in_progress = true;
+      if (1) {
+      seq = seq + 1;
+      if (data.length > 200) data = data.substring(0, 200);
       xhr = new XMLHttpRequest();
-      xhr.newConfirmed = newConfirmed;
-      xhr.reqTime = times[seqConfirmed];
-      num_inflight += 1;
       xhr.onreadystatechange = function() {
 	if (xhr.readyState != 4) return;
-	num_inflight -= 1;
-	onConfirm(self.newConfirmed);
-
+        in_progress = false;
+        if (need_update) {
+          need_update = false;
+          network();
+        }
         stat = document.getElementById("status");
         comment = document.getElementById("comment");
 
         if (xhr.status != 200) {
-          stat.innerHTML = "Connection problem";
+          stat.innerHTML = "Нет связи";
           stat["color"] = "red";
-          comment.innerHTML = "No connection between the phone and computer.";
-	  setTimeout("network();", 2000);
-	  return;
+          comment.innerHTML = "Отсутствует соединение между телефоном и компьютером.";
         } else {
           if (xhr.responseText == "problem") {
-            stat.innerHTML = "Not typing";
+            stat.innerHTML = "Печать выключена";
             stat["color"] = "red";
-            comment.innerHTML = 'Enable WiFiKeyboard input on you device. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings">Visit help page.</a>';
+            comment.innerHTML = 'Включите WiFi клавиатуру в настройках вашего устройства. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings_ru">Описание настройки.</a>';
           } else if (xhr.responseText == "multi") {
-            stat.innerHTML = "Mutiple input";
+            stat.innerHTML = "Другой браузер";
             stat["color"] = "red";
-            comment.innerHTML = "Typing from multiple browser windows is not supported. Use one browser window.";
+            comment.innerHTML = "Ввод одновременно из двух окон интернет браузера не поддерживается. Используйте только одно окно.";
           } else {
-	    delay = new Date().getTime() - this.reqTime;
-            stat.innerHTML = "Connected";
+            stat.innerHTML = "Подключено";
             stat["color"] = "green";
-            comment.innerHTML = "You can type now. <br>Latency is " + delay + " ms";
+            comment.innerHTML = "Можно печатать.";
           }
         }
-	network();
       }
-      xhr.open('GET', "/" + newConfirmed + "," + data, true);                  
+      xhr.open('GET', "/" + seq + "," + data, true);                  
       xhr.send(null);
+      }
     }
 
     function compat() {
@@ -226,16 +196,16 @@
 <tr valign="top">
 <td class="main" width="450">
 <!-- Main Window -->
-<h1>WiFi&nbsp;Keyboard</h1>
-  <h2>Android input:
-  <input id="in" type="text" value="Text typed here goes to android device." style="width:100%">
+<h1>WiFi&nbsp;Клавиатура</h1>
+  <h2>Поле ввода:
+  <input id="in" type="text" value="Этот текст отправляется на устройство." style="width:100%">
   </h2>
 
   <table border="0"><tbody><tr><td cellspacing="50" cellpadding="50">
   <form name="f">
-  <h2>Keyboard mode:</h2>
-  <div class="mode"><input type="radio" name="mode" value="i" checked>International keyboard</div>
-  <div class="mode"><input type="radio" name="mode" value="c">Game mode (key codes only)</div>
+  <h2>Режим клавиатуры:</h2>
+  <div class="mode"><input type="radio" name="mode" value="i" checked>Ввод текста</div>
+  <div class="mode"><input type="radio" name="mode" value="c">Режим для игр (только коды клавиш)</div>
   </form>
   </td></tr></tbody></table>
 
@@ -243,21 +213,21 @@
 </td><td align="right">
 <!-- Side bar -->
   <table border="1" cellpadding="20"><tbody><tr><td cellspacing="50" cellpadding="50">
-  <h2>Status: <font color="black" id="status">Connecting...</font></h2>
+  <h2>Состояние: <font color="black" id="status">Соединение...</font></h2>
   <div id="comment"></div>
   </td></tr></tbody></table>
 
   <br>
   <table border="0"><tbody><tr><td cellspacing="50" cellpadding="50">
-  <h2>Special keys:</h2>
+  <h2>Специальные клавиши:</h2>
   <ul>
   <li>Shift = Shift</li>
   <li>Alt = Alt</li>
-  <li>Arrows = DPAD Arrows</li>
-  <li>Insert or F1 = DPAD Center</li>
+  <li>Стрелки = Стрелки телефона</li>
+  <li>Insert или F1 = Средняя кнопка</li>
   <li>F2 = Menu</li>
-  <li>Escape = BACK</li>
-  <li>F9, F10 = Volume control</li>
+  <li>Escape = Назад(BACK)</li>
+  <li>F9, F10 = Управление громкостью</li>
   </ul>
   </td></tr></tbody></table>
 <!-- Side bar end -->
@@ -265,7 +235,7 @@
 </tr>
 <tr valign="bottom">
 <td colspan="2">
-  <div class="footer"><a href="http://code.google.com/p/wifikeyboard/">Source code available (license GPL v2).</a><br>Created by Ivan Volosyuk on 2010.</div>
+  <div class="footer"><a href="http://code.google.com/p/wifikeyboard/">Доступен исходный код (лицензия GPL v2).</a><br>Разработка Ивана Волосюка, 2010 год</div>
 <!-- <div id="keys">Debug: key presses:</div> -->
 <td>
 </tr>
@@ -273,3 +243,4 @@
 </table>
 </body>
 </html>
+
