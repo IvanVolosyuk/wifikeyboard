@@ -2,55 +2,85 @@ package com.volosyukivan;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.util.Iterator;
+import java.util.Set;
 
 import android.os.Handler;
 import android.os.RemoteException;
-import android.text.Html;
 import android.view.KeyEvent;
 
 public class HttpServer extends Thread {
-  private ServerSocket socket;
+  private ServerSocketChannel ch;
   private HttpService service;
   private Handler handler;
-  private HttpRequestParser httpRequestParser = new HttpRequestParser();
   static final int FOCUS = 1024;
   private boolean isDone;
   private int seqNum = 0;
   private boolean connected;
   private boolean delivered;
 
-  HttpServer(HttpService service, ServerSocket socket) {
+  HttpServer(HttpService service, ServerSocketChannel ch) {
     this.service = service;
-    this.socket = socket;
+    this.ch = ch;
     this.handler = new Handler();
   }
 
   @Override
   public void run() {
     Debug.d("HttpServer started listening");
-
-    while (!isDone()) {
-      try {
-        Socket s = socket.accept();
-        try {
-          processHttpRequest(s);
-        } finally {
-          s.close();
-        }
-      } catch (IOException e) {
-        Debug.e("request failed", e);
-      } catch (NumberFormatException e) {
-        Debug.e("request failed", e);
-      }
-    }
     try {
-      Debug.d("Connection close");
-      socket.close();
+      Selector selector = Selector.open();
+
+      ch.configureBlocking(false);
+      SelectionKey serverkey = ch.register(selector, SelectionKey.OP_ACCEPT);
+
+      while (!isDone()) {
+        Debug.d("waiting for event");
+        selector.select();
+        Debug.d("got an event");
+        Set<SelectionKey> keys = selector.selectedKeys();
+
+        for (Iterator<SelectionKey> i = keys.iterator(); i.hasNext();) {
+          SelectionKey key = i.next();
+          i.remove();
+
+          if (key == serverkey) {
+            if (key.isAcceptable()) {
+              SocketChannel client = ch.accept();
+              Debug.d("NEW CONNECTION from " + client.socket().getRemoteSocketAddress());
+              client.configureBlocking(false);
+              SelectionKey clientkey = client.register(selector, SelectionKey.OP_READ);
+              clientkey.attach(new HttpConnection(this, client));
+            }
+          } else {
+            SocketChannel client = (SocketChannel) key.channel();
+            if (!key.isReadable())
+              continue;
+            HttpConnection conn = (HttpConnection) key.attachment();
+            Debug.d("processing read event");
+            if (!conn.process()) {
+              Debug.d("CONNECTION CLOSED from " + client.socket().getRemoteSocketAddress());
+              key.cancel();
+              client.close();
+            }
+            Debug.d("finished read event");
+          }
+        }
+      }
+        
+      try {
+        Debug.d("Server socket close");
+        selector.close();
+        ch.close();
+      } catch (IOException e) {
+        Debug.e("closing listening socket", e);
+      }
     } catch (IOException e) {
-      Debug.e("closing listening socket", e);
     }
   }
   
@@ -62,102 +92,92 @@ public class HttpServer extends Thread {
     isDone = true;
   }
   
-  public void sendImage(OutputStream os, int resid) throws IOException {
-    os.write(
-        ("HTTP/1.0 200 OK\n" +
-        "Content-Type: image/gif\n\n")
-        .getBytes());
+  public void sendData(
+      SocketChannel ch,
+      String content_type,
+      byte[] content,
+      int content_length) throws IOException {
+    byte[] headers = String.format("HTTP/1.1 200 OK\n" +
+        "Content-Type: %s\n"+
+        "Content-Length: %d\n" +
+        "\n", content_type, content_length).getBytes();
+
+    ByteBuffer out = ByteBuffer.allocate(headers.length + content_length);
+    out.put(headers);
+    out.put(content, 0, content_length);
+    out.flip();
+    ch.write(out);
+  }
+  
+  public void sendImage(SocketChannel ch, int resid) throws IOException {
     InputStream is2 = service.getResources().openRawResource(resid);
     byte[] image = new byte[10240];
-    os.write(image, 0, is2.read(image));
+    sendData(ch, "image/gif", image, is2.read(image));
   }
 
-  private void processHttpRequest(Socket s) throws IOException {
-    // Debug.d("got request");
-    InputStream is = s.getInputStream();
-    OutputStream os = s.getOutputStream();
-    boolean newConnection = true;
-    
-    while (true) {
-      String req = httpRequestParser.getRequest(is);
-      Debug.d("got key event: " + req);
-      
-      if (!newConnection) {
-        Debug.d("keep alive!");
-      }
-      newConnection = false;
-//      try {
-//        Thread.sleep(1000);
-//      } catch (InterruptedException e) {
-//        // TODO Auto-generated catch block
-//        e.printStackTrace();
-//      }
+  public void processRequest(String req, SocketChannel ch) throws IOException {
+    Debug.d("got key event: " + req);
 
-      if (req.equals("")) {
-        Debug.d("sending html page");
-        os.write(
-            ("HTTP/1.0 200 OK\n" +
-            "Content-Type: text/html; charset=UTF-8\n\n")
-            .getBytes());
-        String page = service.htmlpage.replace("12345", Integer.toString(seqNum + 1));
-        byte[] bytes = page.getBytes();
-        os.write(bytes, 0, bytes.length);
-        sendKey(FOCUS, true);
-        return;
-      }
+    if (req.equals("")) {
+      Debug.d("sending html page");
+      String page = service.htmlpage.replace("12345", Integer.toString(seqNum + 1));
+      byte[] content = page.getBytes("UTF-8");
+      sendData(ch, "text/html; charset=UTF-8", content, content.length);
+      sendKey(FOCUS, true);
+      return;
+    }
 
 
-      if (req.equals("bg.gif")) {
-        sendImage(os, R.raw.bg);
-        return;
-      }
+    if (req.equals("bg.gif")) {
+      sendImage(ch, R.raw.bg);
+      return;
+    }
 
-      if (req.equals("icon.png")) {
-        sendImage(os, R.raw.icon);
-        return;
-      }
+    if (req.equals("icon.png")) {
+      sendImage(ch, R.raw.icon);
+      return;
+    }
 
-      boolean success = true;
-      boolean event = false;
+    boolean success = true;
+    boolean event = false;
 
-      String[] ev = req.split(",", -1);
-      int seq = Integer.parseInt(ev[0]);
-      int numKeysRequired = seq - seqNum;
-      if (numKeysRequired <= 0) return;
-      int numKeysAvailable = ev.length - 2;
-      int numKeys = Math.min(numKeysAvailable, numKeysRequired);
+    String[] ev = req.split(",", -1);
+    int seq = Integer.parseInt(ev[0]);
+    int numKeysRequired = seq - seqNum;
+    if (numKeysRequired <= 0) {
+      response(ch, "multi");
+      return;
+    }
+    int numKeysAvailable = ev.length - 2;
+    int numKeys = Math.min(numKeysAvailable, numKeysRequired);
 
-      for (int i = numKeys; i >= 1; i--) {
-        Debug.d("Event: " + ev[i]);
-        char mode = ev[i].charAt(0);
-        int code = Integer.parseInt(ev[i].substring(1));
-        if (mode == 'C') {
-          // FIXME: can be a problem with extended unicode characters
-          success = success && sendChar(code);
-        } else {
-          boolean pressed = mode == 'D';
-          success = success && sendKey(code, pressed);
-        }
-        event = true;
-      }
-      seqNum = seq;
-      if (!event) {
-        response(os, "multi");
-      } else if (success) {
-        response(os, "ok");
+    for (int i = numKeys; i >= 1; i--) {
+      Debug.d("Event: " + ev[i]);
+      char mode = ev[i].charAt(0);
+      int code = Integer.parseInt(ev[i].substring(1));
+      if (mode == 'C') {
+        // FIXME: can be a problem with extended unicode characters
+        success = success && sendChar(code);
       } else {
-        response(os, "problem");
+        boolean pressed = mode == 'D';
+        success = success && sendKey(code, pressed);
       }
+      event = true;
+    }
+    seqNum = seq;
+    if (!event) {
+      response(ch, "multi");
+    } else if (success) {
+      response(ch, "ok");
+    } else {
+      response(ch, "problem");
     }
   }
   
-  private void response(OutputStream os, String val) throws IOException {
+  private void response(SocketChannel ch, String val) throws IOException {
     Debug.d(val);
-    os.write(String.format(
-        "HTTP/1.1 200 OK\n" +
-        "Content-Type: text/plain\n" +
-        "Content-Length: %d\n" +
-        "\n%s", val.length(), val).getBytes("UTF-8"));
+    byte[] content = val.getBytes();
+    sendData(ch, "text/plain", content, content.length);
   }
   
   private boolean sendKey(final int code0, final boolean pressed) {

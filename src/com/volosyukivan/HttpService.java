@@ -2,7 +2,7 @@ package com.volosyukivan;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.ServerSocket;
+import java.nio.channels.ServerSocketChannel;
 
 import android.app.Service;
 import android.content.Intent;
@@ -13,7 +13,7 @@ public class HttpService extends Service {
   RemoteKeyListener listener;
   String htmlpage;
   int port;
-  ServerSocket socket;
+  ServerSocketChannel socket;
 
   final IBinder mBinder = new RemoteKeyboard.Stub() {
     //@Override
@@ -36,23 +36,34 @@ public class HttpService extends Service {
     }
   };
   
-  private ServerSocket makeSocket() {
+  private ServerSocketChannel makeSocket() {
+    ServerSocketChannel ch;
     try {
-      return new ServerSocket(7777, 10);
+      ch = ServerSocketChannel.open();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    try {
+      ch.socket().bind(new java.net.InetSocketAddress(7777));
+      return ch;
     } catch (IOException e) {}
     
     for (int i = 1; i < 9; i++) {
       try {
-        return new ServerSocket(i * 1111, 10);
+        ch.socket().bind(new java.net.InetSocketAddress(i * 1111));
+        return ch;
       } catch (IOException e) {}
     }
     for (int i = 2; i < 64; i++) {
       try {
-        return new ServerSocket(i * 1000, 10);
+        ch.socket().bind(new java.net.InetSocketAddress(i * 1000));
+        return ch;
       } catch (IOException e) {}
     }
     try {
-      return new ServerSocket(7777, 10);
+      ch.socket().bind(new java.net.InetSocketAddress(7777));
+      return ch;
     } catch (Throwable t) {
       throw new RuntimeException(t);
     }
@@ -64,7 +75,7 @@ public class HttpService extends Service {
     Debug.d("HttpService started");
 
     socket = makeSocket();
-    port = socket.getLocalPort();
+    port = socket.socket().getLocalPort();
     server = new HttpServer(this, socket);
     InputStream is = getResources().openRawResource(R.raw.key);
     int pagesize = 32768;
