@@ -25,6 +25,10 @@
     events=Object();
     times=Object();
     num_inflight = 0;
+    latency = 0;
+    latency2 = 0;
+    latencyTime = 0;
+    latencyTime2 = 0;
 
 
     function onConfirm(newConfirmed) {
@@ -93,10 +97,34 @@
           stat["color"] = "red";
           comment.innerHTML = "Typing from multiple browser windows is not supported. Use one browser window.";
         } else {
-	  delay = new Date().getTime() - this.reqTime;
+	  currTime = new Date().getTime();
+	  delay = currTime - this.reqTime;
+
+	  if (currTime > latencyTime2 + 5000) {
+	    latency2 = 0;
+	    latencyTime2 = 0;
+	  }
+	  if (currTime > latencyTime + 5000) {
+	    latency = latency2;
+	    latencyTime = latencyTime2;
+	    latency2 = 0;
+	    latencyTime2 = 0;
+	  }
+
+	  if (currTime > latencyTime + 2500) {
+	    if (delay > latency2) {
+	      latency2 = delay;
+	      latencyTime2 = currTime;
+	    }
+	  }
+	  if (delay > latency) {
+	    latencyTime = currTime;
+	    latency = delay;
+	  }
           stat.innerHTML = "Connected";
           stat["color"] = "green";
-          comment.innerHTML = "You can type now. <br>Latency is " + delay + " ms";
+	  text = "You can type now. <br>Latency is %d ms";
+          comment.innerHTML = text.replace("%d", latency);
         }
 	onConfirm(self.newConfirmed);
 	network();

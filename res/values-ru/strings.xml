@@ -41,6 +41,7 @@
 <string name="input_from_two_devices_desc">Ввод одновременно из двух окон интернет браузера не поддерживается. Используйте только одно окно.</string>
 <string name="connection_ok_title">Подключено</string>
 <string name="connection_ok_desc">Можно печатать.</string>
+<string name="connection_ok_latency">Задержка: %d мс</string>
 <string name="input_field_title">Поле ввода:</string>
 <string name="input_field_message">Этот текст отправляется на устройство.</string>
 <string name="keyboard_mode_title">Режим клавиатуры:</string>

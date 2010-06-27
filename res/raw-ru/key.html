@@ -17,37 +17,67 @@
    };
 
     // format: /seq,code,press/5012,32,1/
-    data = "";
-    seq = 12345;
     ignore_next_char = false;
     repeat_key_code = "-1";
-    in_progress = false;
-    need_update = false;
 
-    function send(code, mode) {
-      data = mode + code + "," + data;
-      if (in_progress) {
-        need_update = true;
-        return;
+    seqConfirmed = 12345;
+    seqPressed = seqConfirmed;
+    events=Object();
+    times=Object();
+    num_inflight = 0;
+    latency = 0;
+    latency2 = 0;
+    latencyTime = 0;
+    latencyTime2 = 0;
+
+
+    function onConfirm(newConfirmed) {
+      if (newConfirmed == seqPressed) {
+        events=Object();
+	times=Object();
       }
-//      var el = document.getElementById("keys");
-//      el.innerHTML = el.innerHTML + mode + code + " ";
+      if (newConfirmed <= seqConfirmed) return;
+      for (i = seqConfirmed; i < newConfirmed; i++) {
+        events[i] = undefined;
+	times[i] = undefined;
+	seqConfirmed = newConfirmed;
+      }
       network();
     }
 
+    function send(code, mode) {
+      ev = mode + code;
+      events[seqPressed] = ev;
+      times[seqPressed] = new Date().getTime();
+      seqPressed += 1
+//      var el = document.getElementById("keys");
+//      el.innerHTML = el.innerHTML + mode + code + " ";
+      network()
+    }
+
     function network() {
-      in_progress = true;
-      if (1) {
-      seq = seq + 1;
-      if (data.length > 200) data = data.substring(0, 200);
+      if (seqConfirmed == seqPressed) return;
+      if (num_inflight >= 1) return;
+
+      //seq = seq + 1;
+      //if (data.length > 200) data = data.substring(0, 200);
+
+      charsToTransmit = seqPressed - seqConfirmed;
+      if (charsToTransmit > 100) charsToTransmit = 100;
+      data = events[seqConfirmed] + ",";
+      newConfirmed = seqConfirmed + charsToTransmit;
+      for (i = seqConfirmed + 1; i < newConfirmed; i++) {
+        data = events[i] + "," + data;
+      }
+
       xhr = new XMLHttpRequest();
+      xhr.newConfirmed = newConfirmed;
+      xhr.reqTime = times[seqConfirmed];
+      num_inflight += 1;
       xhr.onreadystatechange = function() {
 	if (xhr.readyState != 4) return;
-        in_progress = false;
-        if (need_update) {
-          need_update = false;
-          network();
-        }
+	num_inflight -= 1;
+
         stat = document.getElementById("status");
         comment = document.getElementById("comment");
 
@@ -55,25 +85,52 @@
           stat.innerHTML = "Нет связи";
           stat["color"] = "red";
           comment.innerHTML = "Отсутствует соединение между телефоном и компьютером.";
-        } else {
-          if (xhr.responseText == "problem") {
-            stat.innerHTML = "Печать выключена";
-            stat["color"] = "red";
-            comment.innerHTML = 'Включите WiFi клавиатуру в настройках вашего устройства. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings_ru">Описание настройки.</a>';
-          } else if (xhr.responseText == "multi") {
-            stat.innerHTML = "Другой браузер";
-            stat["color"] = "red";
-            comment.innerHTML = "Ввод одновременно из двух окон интернет браузера не поддерживается. Используйте только одно окно.";
-          } else {
-            stat.innerHTML = "Подключено";
-            stat["color"] = "green";
-            comment.innerHTML = "Можно печатать.";
-          }
+	  setTimeout("network();", 2000);
+	  return;
         }
+        if (xhr.responseText == "problem") {
+          stat.innerHTML = "Печать выключена";
+          stat["color"] = "red";
+          comment.innerHTML = 'Включите WiFi клавиатуру в настройках вашего устройства. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings_ru">Описание настройки.</a>';
+        } else if (xhr.responseText == "multi") {
+          stat.innerHTML = "Другой браузер";
+          stat["color"] = "red";
+          comment.innerHTML = "Ввод одновременно из двух окон интернет браузера не поддерживается. Используйте только одно окно.";
+        } else {
+	  currTime = new Date().getTime();
+	  delay = currTime - this.reqTime;
+
+	  if (currTime > latencyTime2 + 5000) {
+	    latency2 = 0;
+	    latencyTime2 = 0;
+	  }
+	  if (currTime > latencyTime + 5000) {
+	    latency = latency2;
+	    latencyTime = latencyTime2;
+	    latency2 = 0;
+	    latencyTime2 = 0;
+	  }
+
+	  if (currTime > latencyTime + 2500) {
+	    if (delay > latency2) {
+	      latency2 = delay;
+	      latencyTime2 = currTime;
+	    }
+	  }
+	  if (delay > latency) {
+	    latencyTime = currTime;
+	    latency = delay;
+	  }
+          stat.innerHTML = "Подключено";
+          stat["color"] = "green";
+	  text = "Можно печатать. <br>Задержка: %d мс";
+          comment.innerHTML = text.replace("%d", latency);
+        }
+	onConfirm(self.newConfirmed);
+	network();
       }
-      xhr.open('GET', "/" + seq + "," + data, true);                  
+      xhr.open('GET', "/" + newConfirmed + "," + data, true);                  
       xhr.send(null);
-      }
     }
 
     function compat() {
