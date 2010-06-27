@@ -37,7 +37,7 @@ public class HttpConnection {
         int bufAvailable = BUFSIZE - offset;
         int size = Math.min(bufAvailable, r);
         in.get(buffer, offset, size);
-        newData(size);
+        if (newData(size) == false) return false;
         r -= size;
       }
       return true;
@@ -46,7 +46,7 @@ public class HttpConnection {
       return false;
     }
   }
-  private void newData(int r) throws IOException {
+  private boolean newData(int r) throws IOException {
     // this is not a loop, it's a way to restart processing new request
     restart: while (true) {
       Debug.d(String.format("Request:'%s'", new String(buffer, offset, r)));
@@ -61,7 +61,8 @@ public class HttpConnection {
             req = null;
             int remainingChars = offset + r - (i + 1);
             System.arraycopy(buffer, i + 1, buffer, 0, remainingChars);
-            server.processRequest(currentRequest, ch);
+            if (server.processRequest(currentRequest, ch) == false)
+              return false;
             offset = 0;
             r = remainingChars;
             lineLen = 0;
@@ -82,6 +83,7 @@ public class HttpConnection {
       }
       break;
     }
+    return true;
   }
   
   private String parseRequest(String line) throws IOException {

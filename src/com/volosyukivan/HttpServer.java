@@ -115,7 +115,7 @@ public class HttpServer extends Thread {
     sendData(ch, "image/gif", image, is2.read(image));
   }
 
-  public void processRequest(String req, SocketChannel ch) throws IOException {
+  public boolean processRequest(String req, SocketChannel ch) throws IOException {
     Debug.d("got key event: " + req);
 
     if (req.equals("")) {
@@ -124,29 +124,34 @@ public class HttpServer extends Thread {
       byte[] content = page.getBytes("UTF-8");
       sendData(ch, "text/html; charset=UTF-8", content, content.length);
       sendKey(FOCUS, true);
-      return;
+      return false;
     }
 
 
     if (req.equals("bg.gif")) {
       sendImage(ch, R.raw.bg);
-      return;
+      return false;
     }
 
     if (req.equals("icon.png")) {
       sendImage(ch, R.raw.icon);
-      return;
+      return false;
     }
 
     boolean success = true;
     boolean event = false;
 
     String[] ev = req.split(",", -1);
+    boolean http11 = true;
+    if (ev[0].charAt(0) == 'H') {
+      http11 = false;
+      ev[0] = ev[0].substring(1);
+    }
     int seq = Integer.parseInt(ev[0]);
     int numKeysRequired = seq - seqNum;
     if (numKeysRequired <= 0) {
       response(ch, "multi");
-      return;
+      return http11;
     }
     int numKeysAvailable = ev.length - 2;
     int numKeys = Math.min(numKeysAvailable, numKeysRequired);
@@ -172,6 +177,7 @@ public class HttpServer extends Thread {
     } else {
       response(ch, "problem");
     }
+    return http11;
   }
   
   private void response(SocketChannel ch, String val) throws IOException {
