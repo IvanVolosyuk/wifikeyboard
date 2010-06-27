@@ -73,7 +73,6 @@
       xhr.onreadystatechange = function() {
 	if (xhr.readyState != 4) return;
 	num_inflight -= 1;
-	onConfirm(self.newConfirmed);
 
         stat = document.getElementById("status");
         comment = document.getElementById("comment");
@@ -84,22 +83,22 @@
           comment.innerHTML = "No connection between the phone and computer.";
 	  setTimeout("network();", 2000);
 	  return;
-        } else {
-          if (xhr.responseText == "problem") {
-            stat.innerHTML = "Not typing";
-            stat["color"] = "red";
-            comment.innerHTML = 'Enable WiFiKeyboard input on you device. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings">Visit help page.</a>';
-          } else if (xhr.responseText == "multi") {
-            stat.innerHTML = "Mutiple input";
-            stat["color"] = "red";
-            comment.innerHTML = "Typing from multiple browser windows is not supported. Use one browser window.";
-          } else {
-	    delay = new Date().getTime() - this.reqTime;
-            stat.innerHTML = "Connected";
-            stat["color"] = "green";
-            comment.innerHTML = "You can type now. <br>Latency is " + delay + " ms";
-          }
         }
+        if (xhr.responseText == "problem") {
+          stat.innerHTML = "Not typing";
+          stat["color"] = "red";
+          comment.innerHTML = 'Enable WiFiKeyboard input on you device. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings">Visit help page.</a>';
+        } else if (xhr.responseText == "multi") {
+          stat.innerHTML = "Mutiple input";
+          stat["color"] = "red";
+          comment.innerHTML = "Typing from multiple browser windows is not supported. Use one browser window.";
+        } else {
+	  delay = new Date().getTime() - this.reqTime;
+          stat.innerHTML = "Connected";
+          stat["color"] = "green";
+          comment.innerHTML = "You can type now. <br>Latency is " + delay + " ms";
+        }
+	onConfirm(self.newConfirmed);
 	network();
       }
       xhr.open('GET', "/" + newConfirmed + "," + data, true);                  
