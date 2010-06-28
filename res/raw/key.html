@@ -25,7 +25,7 @@
     events=Object();
     times=Object();
     num_inflight = 0;
-    num_hang = 0;
+    num_delayed = 0;
     latency = 0;
     latency2 = 0;
     latencyTime = 0;
@@ -56,18 +56,16 @@
       network()
     }
 
-    function makeXhr(is_retry) {
+    function makeXhr(html_10) {
       var xhr = new XMLHttpRequest();
       xhr.newConfirmed = newConfirmed;
       xhr.reqTime = times[seqConfirmed];
       num_inflight += 1;
       xhr.onreadystatechange = function() {
+	if (xhr.aborted) return;
 	if (xhr.readyState != 4) return;
 	num_inflight -= 1;
 	xhr.finished = true;
-	if (xhr.hang) {
-	  num_hang -= 1;
-	}
 
         stat = document.getElementById("status");
         comment = document.getElementById("comment");
@@ -76,7 +74,10 @@
           stat.innerHTML = "Connection problem";
           stat["color"] = "red";
           comment.innerHTML = "No connection between the phone and computer.";
-	  setTimeout("network();", 2000);
+	  if (num_delayed == 0) {
+	    num_delayed = 1;
+            setTimeout("networkDelayed();", 2000);
+	  }
 	  return;
         }
         if (xhr.responseText == "problem") {
@@ -120,7 +121,19 @@
 	onConfirm(self.newConfirmed);
 	network();
       }
-      if (is_retry) {
+      setTimeout(function() {
+        if (xhr.finished) return;
+	xhr.aborted = true;
+	xhr.abort();
+	num_inflight -= 1;
+        stat = document.getElementById("status");
+        comment = document.getElementById("comment");
+        stat.innerHTML = "Connection problem";
+        stat["color"] = "red";
+        comment.innerHTML = "No connection between the phone and computer.";
+	makeXhr(false);
+      }, 2000);
+      if (html_10) {
         xhr.open('GET', "/H" + newConfirmed + "," + data, true);
       } else {
         xhr.open('GET', "/" + newConfirmed + "," + data, true);
@@ -131,7 +144,7 @@
 
     function network() {
       if (seqConfirmed == seqPressed) return;
-      if (num_inflight > num_hang) return;
+      if (num_inflight > 0) return;
 
       //seq = seq + 1;
       //if (data.length > 200) data = data.substring(0, 200);
@@ -144,25 +157,12 @@
         data = events[i] + "," + data;
       }
 
-      if (num_hang != 0) {
-        var xhr = makeXhr(true);
-      } else {
-        var xhr = makeXhr(false);
-        setTimeout(function() {
-          if (xhr.finished) return;
-          xhr.hang = true;
-	  num_hang += 1;
-          var retry_xhr = makeXhr(true);
-          setTimeout(function() {
-	    if (xhr.finished) return;
-            stat = document.getElementById("status");
-            comment = document.getElementById("comment");
-            stat.innerHTML = "Connection problem";
-            stat["color"] = "red";
-            comment.innerHTML = "No connection between the phone and computer.";
-	  }, 2000);
-	}, 2000);
-      }
+      var xhr = makeXhr(false);
+    }
+
+    function networkDelayed() {
+      num_delayed = 0;
+      network();
     }
 
     function compat() {
