@@ -56,7 +56,7 @@
       network()
     }
 
-    function makeXhr(html_10) {
+    function makeXhr() {
       var xhr = new XMLHttpRequest();
       xhr.newConfirmed = newConfirmed;
       xhr.reqTime = times[seqConfirmed];
@@ -131,13 +131,9 @@
         stat.innerHTML = "Connection problem";
         stat["color"] = "red";
         comment.innerHTML = "No connection between the phone and computer.";
-	makeXhr(false);
-      }, 2000);
-      if (html_10) {
-        xhr.open('GET', "/H" + newConfirmed + "," + data, true);
-      } else {
-        xhr.open('GET', "/" + newConfirmed + "," + data, true);
-      }
+	makeXhr();
+      }, 3000);
+      xhr.open('GET', "/" + newConfirmed + "," + data, true);
       xhr.send(null);
       return xhr;
     }
@@ -157,7 +153,7 @@
         data = events[i] + "," + data;
       }
 
-      var xhr = makeXhr(false);
+      var xhr = makeXhr();
     }
 
     function networkDelayed() {

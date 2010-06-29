@@ -38,30 +38,29 @@ public class HttpService extends Service {
   
   private ServerSocketChannel makeSocket() {
     ServerSocketChannel ch;
-    try {
-      ch = ServerSocketChannel.open();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
 
     try {
+      ch = ServerSocketChannel.open();
       ch.socket().bind(new java.net.InetSocketAddress(7777));
       return ch;
     } catch (IOException e) {}
     
     for (int i = 1; i < 9; i++) {
       try {
+        ch = ServerSocketChannel.open();
         ch.socket().bind(new java.net.InetSocketAddress(i * 1111));
         return ch;
       } catch (IOException e) {}
     }
     for (int i = 2; i < 64; i++) {
       try {
+        ch = ServerSocketChannel.open();
         ch.socket().bind(new java.net.InetSocketAddress(i * 1000));
         return ch;
       } catch (IOException e) {}
     }
     try {
+      ch = ServerSocketChannel.open();
       ch.socket().bind(new java.net.InetSocketAddress(7777));
       return ch;
     } catch (Throwable t) {

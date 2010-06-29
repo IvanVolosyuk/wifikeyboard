@@ -61,8 +61,7 @@ public class HttpConnection {
             req = null;
             int remainingChars = offset + r - (i + 1);
             System.arraycopy(buffer, i + 1, buffer, 0, remainingChars);
-            if (server.processRequest(currentRequest, ch) == false)
-              return false;
+            server.processRequest(currentRequest, ch);
             offset = 0;
             r = remainingChars;
             lineLen = 0;
