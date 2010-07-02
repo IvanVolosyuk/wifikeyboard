@@ -51,9 +51,27 @@
       events[seqPressed] = ev;
       times[seqPressed] = new Date().getTime();
       seqPressed += 1
-//      var el = document.getElementById("keys");
-//      el.innerHTML = el.innerHTML + mode + code + " ";
+      var el = document.getElementById("keys");
+      el.innerHTML = el.innerHTML + 'send:' + mode + code + " ";
       network()
+    }
+
+    function makeNotificationListener() {
+      receiver = new XMLHttpRequest();
+      receiver.onreadystatechange = function() {
+	if (receiver.readyState != 4) return;
+        if (receiver.status != 200) {
+	  // FIXME: error handling
+	  setTimeout("makeNotificationListener();", 2000);
+	}
+        if (receiver.responseText != "") {
+          debug = document.getElementById("debug");
+	  debug.innerHTML = receiver.responseText;
+	}
+	makeNotificationListener();
+      }
+      receiver.open('GET', "/listen", true);
+      receiver.send(null);
     }
 
     function makeXhr() {
@@ -139,6 +157,7 @@
     }
 
     function network() {
+      return;
       if (seqConfirmed == seqPressed) return;
       if (num_inflight > 0) return;
 
@@ -177,6 +196,8 @@
       return false;
     }
     function keyevent(key, mode) {
+      var el = document.getElementById("keys");
+      el.innerHTML = el.innerHTML + 'key:' + mode + key + " ";
       if (compat()) {
         ignore_next_char = mode == 'D';
         repeat_key_code = key;
@@ -201,17 +222,20 @@
       return keyevent(e.keyCode, 'D');
     }
     function press(e) {
+      if (e.charCode != undefined) {
+        ch = e.charCode;
+      } else {
+        ch = e.keyCode;
+      }
+      var el = document.getElementById("keys");
+      el.innerHTML = el.innerHTML + 'char:' + ch + " ";
+
       if (ignore_next_char) {
          ignore_next_char = false;
          return false;
       }
       if (!e) e = window.event;
       if (compat()) return false;
-      if (e.charCode != undefined) {
-        ch = e.charCode;
-      } else {
-        ch = e.keyCode;
-      }
       // firefox and opera hack
       if (ch == 0 || ch == repeat_key_code) {
         send(repeat_key_code, 'D');
@@ -321,7 +345,8 @@
 <tr valign="bottom">
 <td colspan="2">
   <div class="footer"><a href="http://code.google.com/p/wifikeyboard/">Source code available (license GPL v2).</a><br>Created by Ivan Volosyuk on 2010.</div>
-<!-- <div id="keys">Debug: key presses:</div> -->
+<div id="keys">Debug: key presses:</div>
+<div id="debug">New event placeholder.</div>
 <td>
 </tr>
 </tbody>

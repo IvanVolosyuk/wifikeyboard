@@ -13,23 +13,34 @@ import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.view.KeyEvent;
+import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
 
 public class WiFiInputMethod extends InputMethodService {
+  @Override
+  public void onStartInput(EditorInfo attribute, boolean restarting) {
+    super.onStartInput(attribute, restarting);
+    try {
+      remoteKeyboard.notifyClient();
+    } catch (RemoteException e) {
+      Debug.e("failed communicating to HttpService", e);
+    }
+  }
+
   ServiceConnection serviceConnection;
-  private RemoteKeyboard removeKeyboard;
+  private RemoteKeyboard remoteKeyboard;
   protected Stub keyboardListener;
 
   @Override
   public void onDestroy() {
     Debug.d("WiFiInputMethod onDestroy()");
     try {
-      if (removeKeyboard != null)
-        removeKeyboard.unregisterKeyListener(keyboardListener);
+      if (remoteKeyboard != null)
+        remoteKeyboard.unregisterKeyListener(keyboardListener);
     } catch (RemoteException e) {
       Debug.d("Failed to unregister listener");
     }
-    removeKeyboard = null;
+    remoteKeyboard = null;
     if (serviceConnection != null)
       unbindService(serviceConnection);
     serviceConnection = null;
@@ -51,7 +62,7 @@ public class WiFiInputMethod extends InputMethodService {
       public void onServiceConnected(ComponentName name, IBinder service) {
         Debug.d("WiFiInputMethod connected to HttpService.");
         try {
-          removeKeyboard = RemoteKeyboard.Stub.asInterface(service);
+          remoteKeyboard = RemoteKeyboard.Stub.asInterface(service);
           keyboardListener = new RemoteKeyListener.Stub() {
             @Override
             public void keyEvent(int code, boolean pressed) throws RemoteException {
@@ -103,7 +114,7 @@ public class WiFiInputMethod extends InputMethodService {
   }
   
   void receivedKey(int code, boolean pressed) {
-    if (code == HttpServer.FOCUS) {
+    if (code == KeyboardHttpServer.FOCUS) {
       for (int key : pressedKeys) {
         sendKey(key, false, false);
       }

@@ -14,6 +14,7 @@ public class HttpService extends Service {
   String htmlpage;
   int port;
   ServerSocketChannel socket;
+  KeyboardHttpServer server;
 
   final IBinder mBinder = new RemoteKeyboard.Stub() {
     //@Override
@@ -33,6 +34,10 @@ public class HttpService extends Service {
     @Override
     public int getPort() throws RemoteException {
       return port;
+    }
+    @Override
+    public void notifyClient() throws RemoteException {
+      server.notifyClient();
     }
   };
   
@@ -75,7 +80,7 @@ public class HttpService extends Service {
 
     socket = makeSocket();
     port = socket.socket().getLocalPort();
-    server = new HttpServer(this, socket);
+    server = new KeyboardHttpServer(this, socket);
     InputStream is = getResources().openRawResource(R.raw.key);
     int pagesize = 32768;
     byte[] data = new byte[pagesize];
@@ -109,6 +114,4 @@ public class HttpService extends Service {
   public IBinder onBind(Intent intent) {
     return mBinder;
   }
-  
-  HttpServer server;
 }
