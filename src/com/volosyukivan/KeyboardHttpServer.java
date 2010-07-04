@@ -37,7 +37,7 @@ public final class KeyboardHttpServer extends HttpServer {
   public void onEvent(Object o) {
     String event = (String)o;
     for (KeyboardHttpConnection con : waitingConnections) {
-      Debug.d(event);
+//      Debug.d(event);
       byte[] content = event.getBytes();
       ByteBuffer out = con.sendData("text/plain", content, content.length);
       setResponse(con, out);
@@ -52,7 +52,6 @@ public final class KeyboardHttpServer extends HttpServer {
   public String processKeyRequest(String req) {
     boolean success = true;
     boolean event = false;
-
     String[] ev = req.split(",", -1);
     int seq = Integer.parseInt(ev[0]);
     int numKeysRequired = seq - seqNum;
@@ -63,7 +62,7 @@ public final class KeyboardHttpServer extends HttpServer {
     int numKeys = Math.min(numKeysAvailable, numKeysRequired);
 
     for (int i = numKeys; i >= 1; i--) {
-      Debug.d("Event: " + ev[i]);
+//      Debug.d("Event: " + ev[i]);
       char mode = ev[i].charAt(0);
       int code = Integer.parseInt(ev[i].substring(1));
       if (mode == 'C') {
@@ -76,6 +75,7 @@ public final class KeyboardHttpServer extends HttpServer {
       event = true;
     }
     seqNum = seq;
+
     if (!event) {
       return "multi";
     } else if (success) {
@@ -106,7 +106,7 @@ public final class KeyboardHttpServer extends HttpServer {
     });
     return waitNotifyDelivered();
   }
-  
+    
   boolean sendChar(final int code) {
     delivered = false;
     handler.post(new Runnable() {

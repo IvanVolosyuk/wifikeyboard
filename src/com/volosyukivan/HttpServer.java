@@ -11,6 +11,8 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
+import android.util.Log;
+
 public abstract class HttpServer extends Thread {
 
   // syncronized between main and network thread
@@ -33,12 +35,12 @@ public abstract class HttpServer extends Thread {
   }
   protected void setResponse(KeyboardHttpConnection con, ByteBuffer out) {
     con.key.interestOps(SelectionKey.OP_WRITE);
-    con.outputBuffer= out;
+    con.outputBuffer = out;
   }
   
   @Override
   public void run() {
-    Debug.d("HttpServer started listening");
+//    Debug.d("HttpServer started listening");
     try {
       selector = Selector.open();
 
@@ -46,7 +48,7 @@ public abstract class HttpServer extends Thread {
       SelectionKey serverkey = ch.register(selector, SelectionKey.OP_ACCEPT);
 
       while (!isDone()) {
-        Debug.d("waiting for event");
+//        Debug.d("waiting for event");
         selector.select();
         Object ev;
         synchronized (this) {
@@ -57,7 +59,7 @@ public abstract class HttpServer extends Thread {
         if (ev != null) {
           onEvent(ev);
         }
-        Debug.d("got an event");
+//        Debug.d("got an event");
         Set<SelectionKey> keys = selector.selectedKeys();
 
         for (Iterator<SelectionKey> i = keys.iterator(); i.hasNext();) {
@@ -67,7 +69,7 @@ public abstract class HttpServer extends Thread {
           if (key == serverkey) {
             if (key.isAcceptable()) {
               SocketChannel client = ch.accept();
-              Debug.d("NEW CONNECTION from " + client.socket().getRemoteSocketAddress());
+//              Debug.d("NEW CONNECTION from " + client.socket().getRemoteSocketAddress());
               client.configureBlocking(false);
               SelectionKey clientkey = client.register(selector, SelectionKey.OP_READ);
               HttpConnection con = newConnection(client);
@@ -81,14 +83,22 @@ public abstract class HttpServer extends Thread {
               int prevState, newState;
               if (key.isReadable()) {
                 prevState = HttpConnection.SELECTOR_WAIT_FOR_NEW_INPUT; 
-                Debug.d("processing read event");
+//                Debug.d("processing read event");
+                long start = System.currentTimeMillis();
                 newState = conn.processReadEvent();
-                Debug.d("finished read event");
+                long end = System.currentTimeMillis();
+                Debug.d("delay = " + (end - start));
+
+//                int size = android.os.Debug.getThreadAllocSize();
+//                android.os.Debug.stopAllocCounting();
+//                Log.d("wifikeyboard", "finished read event, allocs = " + size);
+//                android.os.Debug.startAllocCounting();
+
               } else if (key.isWritable()) {
                 prevState = HttpConnection.SELECTOR_WAIT_FOR_OUTPUT_BUFFER; 
-                Debug.d("processing write event");
+//                Debug.d("processing write event");
                 newState = conn.processWriteEvent();
-                Debug.d("finished write event");
+                Log.d("wifikeyboard", "finished write event");
               } else {
                 continue;
               }
@@ -97,8 +107,11 @@ public abstract class HttpServer extends Thread {
                   (newState == HttpConnection.SELECTOR_WAIT_FOR_NEW_INPUT ? SelectionKey.OP_READ : 0) |
                   (newState == HttpConnection.SELECTOR_WAIT_FOR_OUTPUT_BUFFER ? SelectionKey.OP_WRITE : 0));
             } catch (IOException io) {
-              Debug.d("CONNECTION CLOSED from " + 
-                  conn.getClient().socket().getRemoteSocketAddress());
+//              Debug.d("CONNECTION CLOSED from " + 
+//                  conn.getClient().socket().getRemoteSocketAddress());
+              if (key != null) key.cancel();
+              conn.getClient().close();
+            } catch (NumberFormatException e) {
               if (key != null) key.cancel();
               conn.getClient().close();
             }
@@ -106,7 +119,7 @@ public abstract class HttpServer extends Thread {
         }
       }
         
-      Debug.d("Server socket close");
+//      Debug.d("Server socket close");
       selector.close();
       ch.close();
     } catch (IOException e) {

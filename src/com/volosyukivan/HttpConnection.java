@@ -69,7 +69,7 @@ public abstract class HttpConnection {
     
     // this is not a loop, it's a way to restart processing new request
     restart: while (true) {
-      Debug.d(String.format("Request:'%s'", new String(buffer, offset, r)));
+//      Debug.d(String.format("Request:'%s'", new String(buffer, offset, r)));
       int start = offset;
       for (int i = offset; i < offset + r; i++) {
         if (buffer[i] != 10) {

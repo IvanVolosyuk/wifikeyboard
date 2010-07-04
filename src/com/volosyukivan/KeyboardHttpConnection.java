@@ -5,6 +5,9 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public final class KeyboardHttpConnection extends HttpConnection {
 
@@ -42,10 +45,11 @@ public final class KeyboardHttpConnection extends HttpConnection {
   }
 
   protected ByteBuffer processRequest(String req) {
-    Debug.d("got key event: " + req);
+//    Debug.d("got key event: " + req);
+
 
     if (req.equals("")) {
-      Debug.d("sending html page");
+//      Debug.d("sending html page");
       String page = server.getPage();
       try {
         byte[] content = page.getBytes("UTF-8");
@@ -79,8 +83,24 @@ public final class KeyboardHttpConnection extends HttpConnection {
     }
 
     String response = server.processKeyRequest(req);
-    Debug.d(response);
+    
+    Map<String, ByteBuffer> cache = responseCache.get();
+    if (cache == null) {
+      cache = new TreeMap<String, ByteBuffer>();
+      responseCache.set(cache);
+    }
+    
+    ByteBuffer buffer = cache.get(response);
+    if (buffer != null) {
+      buffer.position(0);
+      return buffer;
+    }
+//    Debug.d(response);
     byte[] content = response.getBytes();
-    return sendData("text/plain", content, content.length);
+    buffer = sendData("text/plain", content, content.length);
+    cache.put(response, buffer);
+    return buffer;
   }
+  private static ThreadLocal<Map<String,ByteBuffer>> responseCache =
+    new ThreadLocal<Map<String,ByteBuffer>>();
 }

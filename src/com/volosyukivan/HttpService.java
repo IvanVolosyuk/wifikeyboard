@@ -27,7 +27,7 @@ public class HttpService extends Service {
         throws RemoteException {
       if (HttpService.this.listener == listener) {
         HttpService.this.listener = null;
-        Debug.d("Removed listener");
+//        Debug.d("Removed listener");
       }
     }
 
@@ -76,7 +76,7 @@ public class HttpService extends Service {
   @Override
   public void onCreate() {
     super.onCreate();
-    Debug.d("HttpService started");
+//    Debug.d("HttpService started");
 
     socket = makeSocket();
     port = socket.socket().getLocalPort();

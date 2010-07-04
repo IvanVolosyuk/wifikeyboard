@@ -137,7 +137,7 @@
 	  //   latencyTime = currTime;
 	  //   latency = delay;
 	  // }
-	  // text = "You can type now. <br>Latency is %d ms";
+	  // text = "你可以現在輸入。 <br>延遲為 %d 毫秒";
           // comment.innerHTML = text.replace("%d", latency);
 	  setDisplayState("connected");
         }
@@ -287,21 +287,21 @@
       if (stat == null) return;
 
       if (newState == "connected") {
-        stat.innerHTML = "Connected";
+        stat.innerHTML = "已連接";
         stat["color"] = "green";
-        comment.innerHTML = "You can type now.";
+        comment.innerHTML = "你可以現在輸入。";
       } else if (newState == "failure") {
-        stat.innerHTML = "Connection problem";
+        stat.innerHTML = "連接問題";
         stat["color"] = "red";
-        comment.innerHTML = "No connection between the phone and computer.";
+        comment.innerHTML = "手機與電腦直接無連接。";
       } else if (newState == "problem") {
-        stat.innerHTML = "Not typing";
+        stat.innerHTML = "未輸入";
         stat["color"] = "red";
-        comment.innerHTML = 'Enable WiFiKeyboard input on you device. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings">Visit help page.</a>';
+        comment.innerHTML = '在你的設備上開啟 WiFiKeyboard 輸入。 <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings_zh_TW">存取說明頁面。</a>';
       } else if (newState == "multi") {
-        stat.innerHTML = "Mutiple input";
+        stat.innerHTML = "多設備輸入";
         stat["color"] = "red";
-        comment.innerHTML = "Typing from multiple browser windows is not supported. Use one browser window.";
+        comment.innerHTML = "不支援從多個瀏覽器視窗中輸入。請僅適用一個瀏覽器視窗。";
       }
     }
 
@@ -366,16 +366,16 @@
 <tr valign="top">
 <td class="main" width="450">
 <!-- Main Window -->
-<h1>WiFi&nbsp;Keyboard</h1>
+<h1>WiFi&nbsp;鍵盤</h1>
   <h2>Android input (type or paste here):
   <input id="in" type="text" value="" style="width:100%">
   </h2>
 
   <table border="0"><tbody><tr><td cellspacing="50" cellpadding="50">
   <form name="f">
-  <h2>Keyboard mode:</h2>
-  <div class="mode"><input type="radio" name="mode" value="i" checked>International keyboard</div>
-  <div class="mode"><input type="radio" name="mode" value="c">Game mode (key codes only)</div>
+  <h2>鍵盤模式：</h2>
+  <div class="mode"><input type="radio" name="mode" value="i" checked>國際鍵盤</div>
+  <div class="mode"><input type="radio" name="mode" value="c">遊戲模式(僅辨識按鍵碼)</div>
   </form>
   </td></tr></tbody></table>
 
@@ -383,21 +383,21 @@
 </td><td align="right">
 <!-- Side bar -->
   <table border="1" cellpadding="20"><tbody><tr><td cellspacing="50" cellpadding="50">
-  <h2>Status: <font color="black" id="status">Connecting...</font></h2>
+  <h2>狀態： <font color="black" id="status">連接中...</font></h2>
   <div id="comment"></div>
   </td></tr></tbody></table>
 
   <br>
   <table border="0"><tbody><tr><td cellspacing="50" cellpadding="50">
-  <h2>Special keys:</h2>
+  <h2>特殊鍵：</h2>
   <ul>
   <li>Shift = Shift</li>
   <li>Alt = Alt</li>
-  <li>Arrows = DPAD Arrows</li>
-  <li>Insert or F1 = DPAD Center</li>
+  <li>方向鍵 = 搖桿方向鍵</li>
+  <li>Insert 或 F1 = 搖桿中鍵</li>
   <li>F2 = Menu</li>
-  <li>Escape = BACK</li>
-  <li>F9, F10 = Volume control</li>
+  <li>Escape = 返回鍵</li>
+  <li>F9, F10 = 音量控制</li>
   </ul>
   </td></tr></tbody></table>
 <!-- Side bar end -->
@@ -405,7 +405,7 @@
 </tr>
 <tr valign="bottom">
 <td colspan="2">
-  <div class="footer"><a href="http://code.google.com/p/wifikeyboard/">Source code available (license GPL v2).</a><br>Created by Ivan Volosyuk on 2010.</div>
+  <div class="footer"><a href="http://code.google.com/p/wifikeyboard/">源碼可用(基於GPL v2協議)。</a><br>由 Ivan Volosyuk 於 2010 建立。<br/>安智網中文化（<a href="http://goapk.com">http://goapk.com</a>）</div>
 <!-- <div id="keys">Debug: key presses:</div> -->
 <!-- <div id="debug">New event placeholder.</div> -->
 <td>
@@ -414,3 +414,4 @@
 </table>
 </body>
 </html>
+

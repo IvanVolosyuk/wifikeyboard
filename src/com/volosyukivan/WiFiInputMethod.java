@@ -33,12 +33,12 @@ public class WiFiInputMethod extends InputMethodService {
 
   @Override
   public void onDestroy() {
-    Debug.d("WiFiInputMethod onDestroy()");
+//    Debug.d("WiFiInputMethod onDestroy()");
     try {
       if (remoteKeyboard != null)
         remoteKeyboard.unregisterKeyListener(keyboardListener);
     } catch (RemoteException e) {
-      Debug.d("Failed to unregister listener");
+//      Debug.d("Failed to unregister listener");
     }
     remoteKeyboard = null;
     if (serviceConnection != null)
@@ -56,11 +56,11 @@ public class WiFiInputMethod extends InputMethodService {
     PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
     wakeLock = pm.newWakeLock(
         PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, "wifikeyboard");
-    Debug.d("WiFiInputMethod started");
+//    Debug.d("WiFiInputMethod started");
     serviceConnection = new ServiceConnection() {
       //@Override
       public void onServiceConnected(ComponentName name, IBinder service) {
-        Debug.d("WiFiInputMethod connected to HttpService.");
+//        Debug.d("WiFiInputMethod connected to HttpService.");
         try {
           remoteKeyboard = RemoteKeyboard.Stub.asInterface(service);
           keyboardListener = new RemoteKeyListener.Stub() {
@@ -83,7 +83,7 @@ public class WiFiInputMethod extends InputMethodService {
       }
       //@Override
       public void onServiceDisconnected(ComponentName name) {
-        Debug.d("WiFiInputMethod disconnected from HttpService.");
+//        Debug.d("WiFiInputMethod disconnected from HttpService.");
       }
     }; 
     if (this.bindService(new Intent(this, HttpService.class),
@@ -97,7 +97,7 @@ public class WiFiInputMethod extends InputMethodService {
     wakeLock.release();
     InputConnection conn = getCurrentInputConnection();
     if (conn == null) {
-      Debug.d("connection closed");
+//      Debug.d("connection closed");
       return;
     }
     String text = null; 
@@ -152,7 +152,7 @@ public class WiFiInputMethod extends InputMethodService {
     wakeLock.release();
     InputConnection conn = getCurrentInputConnection();
     if (conn == null) {
-      Debug.d("connection closed");
+//      Debug.d("connection closed");
       return;
     }
     conn.sendKeyEvent(new KeyEvent(
