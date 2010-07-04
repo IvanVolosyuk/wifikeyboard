@@ -20,6 +20,7 @@ import android.widget.TextView;
 public class WiFiKeyboard extends Activity {
     int port = 7777;
     LinearLayout layout;
+    ServiceConnection serviceConnection;
     
     private View createView() {
       ArrayList<String> addrs = new ArrayList<String>();
@@ -77,8 +78,7 @@ public class WiFiKeyboard extends Activity {
     @Override
     public void onResume() {
         super.onResume();
-        if (this.bindService(new Intent(this, HttpService.class),
-            new ServiceConnection() {
+        serviceConnection = new ServiceConnection() {
           //@Override
           public void onServiceConnected(ComponentName name, IBinder service) {
             Debug.d("WiFiInputMethod connected to HttpService.");
@@ -97,11 +97,19 @@ public class WiFiKeyboard extends Activity {
           public void onServiceDisconnected(ComponentName name) {
             Debug.d("WiFiInputMethod disconnected from HttpService.");
           }
-        }, BIND_AUTO_CREATE) == false) {
+        };
+        if (this.bindService(new Intent(this, HttpService.class),
+            serviceConnection, BIND_AUTO_CREATE) == false) {
           throw new RuntimeException("failed to connect to HttpService");
         }
 
         setContentView(createView());
+    }
+    
+    @Override
+    protected void onPause() {
+      super.onPause();
+      this.unbindService(serviceConnection);
     }
     
     private void text(int resId) {

@@ -2,6 +2,7 @@
 
 import xml.parsers.expat;
 import sys;
+import re;
 parser=xml.parsers.expat.ParserCreate('UTF-8');
 
 values_en = {}
@@ -32,9 +33,15 @@ def parse(lang, values):
     f=open('res/values-%s/strings.xml' % lang);
   p.ParseFile(f);
 
+def parse_R(file, values):
+  for line in open(file):
+    match = re.search(".*public static final int (.*)=0x(.*);", line)
+    if match:
+      values[match.group(1)] = match.group(2)
+
 parse('en', values_en);
-parse(sys.argv[1], values_lang);
-page=open('res/raw/key.html').read();
+parse_R('gen/com/volosyukivan/R.java', values_lang);
+page=open('html/key.html').read();
 for num,(key,orig) in enumerate(
          sorted(values_en.iteritems(),
 	        key=lambda x:len(x[1]), reverse=True)):
@@ -46,7 +53,9 @@ for num,(key,orig) in enumerate(
 for key,repl in values_lang.iteritems():
   if not key in values_hash: continue;
   orig = values_hash[key];
-  replacement = values_lang[key];
+  replacement = '$' + values_lang[key];
   page = page.replace(orig, replacement);
-print page.encode('UTF-8')
 
+old = open("res/raw/key.html").read();
+if (old != page):
+  open("res/raw/key.html", "w").write(page.encode('UTF-8'));

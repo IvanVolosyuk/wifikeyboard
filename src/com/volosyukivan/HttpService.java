@@ -84,6 +84,7 @@ public class HttpService extends Service {
     InputStream is = getResources().openRawResource(R.raw.key);
     int pagesize = 32768;
     byte[] data = new byte[pagesize];
+    StringBuilder page;
     
     try {
       int offset = 0;
@@ -93,10 +94,18 @@ public class HttpService extends Service {
         offset += r;
         if (offset >= pagesize) throw new IOException("page is too large to load");
       }
-      htmlpage = new String(data, 0, offset);
+      page = new StringBuilder();
+      page.append(new String(data, 0, offset));
     } catch (IOException e) {
       throw new RuntimeException("failed to load html page", e);
     }
+    while (true) {
+      int pos = page.indexOf("$");
+      if (pos == -1) break;
+      int res = Integer.parseInt(page.substring(pos + 1, pos + 9), 16);
+      page.replace(pos, pos + 9, getString(res));
+    }
+    htmlpage = page.toString();
     server.start();
   }
   

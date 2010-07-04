@@ -42,7 +42,7 @@ To enable !WiFiKeyboard on your device:
 <string name="connection_ok_title">Connected</string>
 <string name="connection_ok_desc">You can type now.</string>
 <string name="connection_ok_latency">Latency is %d ms</string>
-<string name="input_field_title">Android input:</string>
+<string name="input_field_title">Android input (type or paste here):</string>
 <string name="input_field_message">Text typed here goes to android device.</string>
 <string name="keyboard_mode_title">Keyboard mode:</string>
 <string name="keyboard_mode_text">International keyboard</string>

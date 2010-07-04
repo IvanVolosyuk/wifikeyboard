@@ -42,7 +42,7 @@
 <string name="connection_ok_title">Подключено</string>
 <string name="connection_ok_desc">Можно печатать.</string>
 <string name="connection_ok_latency">Задержка: %d мс</string>
-<string name="input_field_title">Поле ввода:</string>
+<string name="input_field_title">Поле ввода (для печати и вставки текста):</string>
 <string name="input_field_message">Этот текст отправляется на устройство.</string>
 <string name="keyboard_mode_title">Режим клавиатуры:</string>
 <string name="keyboard_mode_text">Ввод текста</string>
