@@ -55,7 +55,10 @@ for key,repl in values_lang.iteritems():
   orig = values_hash[key];
   replacement = '$' + values_lang[key];
   page = page.replace(orig, replacement);
-
-old = open("res/raw/key.html").read();
+old = None
+try:
+  old = open("res/raw/key.html").read();
+except:
+  pass
 if (old != page):
   open("res/raw/key.html", "w").write(page.encode('UTF-8'));
