@@ -22,7 +22,7 @@ public class WiFiKeyboard extends Activity {
     LinearLayout layout;
     ServiceConnection serviceConnection;
     
-    private View createView() {
+    public static ArrayList<String> getNetworkAddresses() {
       ArrayList<String> addrs = new ArrayList<String>();
       try {
         Enumeration<NetworkInterface> ifaces =
@@ -39,7 +39,11 @@ public class WiFiKeyboard extends Activity {
       } catch (SocketException e) {
         Debug.d("failed to get network interfaces");
       }
-
+      return addrs;
+    }
+    
+    private View createView() {
+      ArrayList<String> addrs = getNetworkAddresses();
       ScrollView parent = new ScrollView(this);
       int fill = LinearLayout.LayoutParams.FILL_PARENT;
       int wrap = LinearLayout.LayoutParams.WRAP_CONTENT;

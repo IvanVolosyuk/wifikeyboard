@@ -3,11 +3,24 @@ package com.volosyukivan;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.ServerSocketChannel;
+import java.util.ArrayList;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.app.Service;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.SharedPreferences;
+import android.content.SharedPreferences.Editor;
+import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
+import android.util.Log;
 
 public class HttpService extends Service {
   RemoteKeyListener listener;
@@ -15,6 +28,22 @@ public class HttpService extends Service {
   int port;
   ServerSocketChannel socket;
   KeyboardHttpServer server;
+  private static boolean isRunning = false;
+  private IntentFilter mWifiStateFilter;
+  private PhoneStateListener dataListener = new PhoneStateListener() {
+    @Override
+    public void onDataConnectionStateChanged(int state) {
+      super.onDataConnectionStateChanged(state);
+      updateNotification(false);
+    }
+  };
+
+  
+  public HttpService() {
+    mWifiStateFilter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+    mWifiStateFilter.addAction(WifiManager.WIFI_STATE_CHANGED_ACTION);
+    mWifiStateFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED);
+  }
 
   final IBinder mBinder = new RemoteKeyboard.Stub() {
     //@Override
@@ -41,18 +70,64 @@ public class HttpService extends Service {
     }
   };
   
+  private void updateNotification(boolean ticker) {
+    long when = System.currentTimeMillis();
+    ArrayList<String> addrs = WiFiKeyboard.getNetworkAddresses();
+    String addr;
+    if (addrs.size() > 0) {
+      addr = "http://" + addrs.get(0) + ":" + port;
+    } else {
+      addr = "Port: " + port;
+    }
+    String tickerText = addr + " - WiFiKeyboard";
+    Notification notification = new Notification(R.drawable.icon, ticker ? tickerText : null, when);
+    
+    Context context = getApplicationContext();
+    CharSequence contentTitle = "WiFi Keyboard";
+    CharSequence contentText = addr;
+    Intent notificationIntent = new Intent(this, WiFiKeyboard.class);
+    PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
+    notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+//    startForeground(0, notification);
+//    setForeground(true);
+    NotificationManager mgr =
+      (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    mgr.notify(0, notification);
+  }
+  
+  private final BroadcastReceiver mWifiStateReceiver = new BroadcastReceiver() {
+    @Override
+    public void onReceive(Context context, Intent intent) {
+      updateNotification(false);
+    }
+  };
+  
   private ServerSocketChannel makeSocket() {
     ServerSocketChannel ch;
+    
+    SharedPreferences prefs = getSharedPreferences("port", MODE_PRIVATE);
+    int savedPort = prefs.getInt("port", 7777);
 
     try {
       ch = ServerSocketChannel.open();
-      ch.socket().bind(new java.net.InetSocketAddress(7777));
+      ch.socket().setReuseAddress(true);
+      ch.socket().bind(new java.net.InetSocketAddress(savedPort));
       return ch;
     } catch (IOException e) {}
+    
+    if (savedPort != 7777) {
+      try {
+        ch = ServerSocketChannel.open();
+        ch.socket().setReuseAddress(true);
+        ch.socket().bind(new java.net.InetSocketAddress(7777));
+        return ch;
+      } catch (IOException e) {}
+    }
     
     for (int i = 1; i < 9; i++) {
       try {
         ch = ServerSocketChannel.open();
+        ch.socket().setReuseAddress(true);
         ch.socket().bind(new java.net.InetSocketAddress(i * 1111));
         return ch;
       } catch (IOException e) {}
@@ -60,12 +135,14 @@ public class HttpService extends Service {
     for (int i = 2; i < 64; i++) {
       try {
         ch = ServerSocketChannel.open();
+        ch.socket().setReuseAddress(true);
         ch.socket().bind(new java.net.InetSocketAddress(i * 1000));
         return ch;
       } catch (IOException e) {}
     }
     try {
       ch = ServerSocketChannel.open();
+      ch.socket().setReuseAddress(true);
       ch.socket().bind(new java.net.InetSocketAddress(7777));
       return ch;
     } catch (Throwable t) {
@@ -75,11 +152,21 @@ public class HttpService extends Service {
   
   @Override
   public void onCreate() {
+    Log.d("wifikeyboard", "onCreate()");
     super.onCreate();
-//    Debug.d("HttpService started");
-
+    if (isRunning) return;
     socket = makeSocket();
     port = socket.socket().getLocalPort();
+    Editor editor = getSharedPreferences("port", MODE_PRIVATE).edit();
+    editor.putInt("port", port);
+    editor.commit();
+    updateNotification(true);
+    
+    
+    registerReceiver(mWifiStateReceiver, mWifiStateFilter);
+    TelephonyManager t = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+    t.listen(dataListener, PhoneStateListener.LISTEN_DATA_CONNECTION_STATE);
+
     server = new KeyboardHttpServer(this, socket);
     InputStream is = getResources().openRawResource(R.raw.key);
     int pagesize = 32768;
@@ -111,11 +198,15 @@ public class HttpService extends Service {
   
   @Override
   public void onDestroy() {
+    isRunning = false;
+//    stopForeground(true);
+    Log.d("wifikeyboard", "onDestroy()");
     server.finish();
-    try {
-      socket.close();
-    } catch (IOException e) {
-    }
+    unregisterReceiver(mWifiStateReceiver);
+    NotificationManager mgr =
+      (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+    mgr.cancelAll();
+
     super.onDestroy();
   }
 

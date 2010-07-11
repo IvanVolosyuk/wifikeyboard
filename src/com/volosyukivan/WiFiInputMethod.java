@@ -147,9 +147,15 @@ public class WiFiInputMethod extends InputMethodService {
         KeyEvent.META_ALT_ON | KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON);
   }
   
+  private long lastWake;
+  
   void sendKey(int code, boolean down, boolean resetModifiers) {
-    wakeLock.acquire();
-    wakeLock.release();
+    long time = System.currentTimeMillis();
+    if (time - lastWake > 5000) {
+      wakeLock.acquire();
+      wakeLock.release();
+      lastWake = time;
+    }
     InputConnection conn = getCurrentInputConnection();
     if (conn == null) {
 //      Debug.d("connection closed");

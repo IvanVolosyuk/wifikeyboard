@@ -22,10 +22,17 @@ public abstract class HttpServer extends Thread {
   private Selector selector;
   private ServerSocketChannel ch;
   private Object event;
+
+  boolean finished;
   
 
   public HttpServer(ServerSocketChannel ch) {
     this.ch = ch;
+    try {
+      selector = Selector.open();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
   
   public void postEvent(Object event) {
@@ -42,8 +49,6 @@ public abstract class HttpServer extends Thread {
   public void run() {
 //    Debug.d("HttpServer started listening");
     try {
-      selector = Selector.open();
-
       ch.configureBlocking(false);
       SelectionKey serverkey = ch.register(selector, SelectionKey.OP_ACCEPT);
 
@@ -125,6 +130,10 @@ public abstract class HttpServer extends Thread {
     } catch (IOException e) {
       Debug.e("network loop terminated", e);
     }
+    synchronized (this) {
+      finished = true;
+      notifyAll();
+    }
   }
   
   private final synchronized boolean isDone() {
@@ -133,6 +142,13 @@ public abstract class HttpServer extends Thread {
   
   public synchronized void finish() {
     isDone = true;
+    selector.wakeup();
+    while (!finished)
+      try {
+        wait();
+      } catch (InterruptedException e) {
+        break;
+      }
   }
   
   public abstract HttpConnection newConnection(SocketChannel ch);

@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string name="app_name">WiFiKeyboard</string>
+<string name="app_name">无线键盘</string>
 
-<string name="desc_setup_wifi">设置 WiFiKeyboard：</string>
+<string name="desc_setup_wifi">设置 无线键盘：</string>
 <string name="desc_goto_settings">转到 设置-&gt;语言 &amp; 键盘</string>
-<string name="desc_enable_kbd">在列表中开启 WiFiKeyboard</string>
+<string name="desc_enable_kbd">在列表中开启 无线键盘</string>
 <string name="desc_toch_input_field">在任何的输入框中点击并按住保持一秒</string>
-<string name="desc_change_input_method">改变 \"输入模式\" 为 \"WiFiKeyboard\"</string>
+<string name="desc_change_input_method">改变 \"输入模式\" 为 \"无线键盘\"</string>
 <string name="desc_enable_network">确定你启用了 WiFi 或 GPRS/3G 网络</string>
 <string name="desc_connect_to_one">连接你的电脑浏览器到 http://%s:%d</string>
 <string name="desc_connect_to_any">连接你的电脑浏览器到以下任何一个：</string>
@@ -16,26 +16,26 @@
 <string name="desc_cmdline">在命令行界面中输入 \"adb forward tcp:%d tcp:%d\"</string>
 <string name="desc_connect_local">然后连接你的电脑浏览器到 http://localhost:%d</string>
 
-<string name="page_title">WiFi&amp;nbsp;键盘</string>
+<string name="page_title">无线键盘</string>
 <string name="conn_problem_title">连接问题</string>
 <string name="conn_problem_desc">手机与电脑直接无连接。</string>
 <string name="input_disabled_title">未输入</string>
-<string name="input_disabled_desc">在你的设备上开启 WiFiKeyboard 输入。</string>
+<string name="input_disabled_desc">在你的设备上开启 无线键盘 输入。</string>
 <string name="input_disabled_link_text">访问帮助页面。</string>
 <!-- ignore the line, I'll add the url myself -->
 <string name="input_disabled_link_url">http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings_zh_CN</string>
-<!-- Please preserve formating of wiki page, "!" sign before WiFiKeyboard disables automatic link creation from WiFiKeyboard because it is WikiWord -->
+<!-- Please preserve formating of wiki page, "!" sign before 无线键盘 disables automatic link creation from 无线键盘 because it is WikiWord -->
 <string name="help_wiki_page">
-#summary 如何在设备上启用 !WiFiKeyboard
+#summary 如何在设备上启用 !无线键盘
 
-= 如何在设备上启用 !WiFiKeyboard =
+= 如何在设备上启用 !无线键盘 =
 
-在你的设备上启用 !WiFiKeyboard：
+在你的设备上启用 !无线键盘：
   * 在你的设备上找到输入方式的设置然后启用它：
      * 在桌面上按Menu键
      * 转至：设置 -&gt; 语言和键盘
-     * 勾选 !WiFiKeyboard
-  * 在任何字段上长按然后选择\"输入方式\" -&gt; !WiFiKeyboard。
+     * 勾选 !无线键盘
+  * 在任何字段上长按然后选择\"输入方式\" -&gt; !无线键盘。
 </string>
 <string name="input_from_two_devices_title">多设备输入</string>
 <string name="input_from_two_devices_desc">不支持从多个浏览器窗口中输入。请仅适用一个浏览器窗口。</string>

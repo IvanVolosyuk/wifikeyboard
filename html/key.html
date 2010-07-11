@@ -63,7 +63,7 @@
       times[seqPressed] = new Date().getTime();
       seqPressed += 1
 //      var el = document.getElementById("keys");
-//      el.innerHTML = el.innerHTML + 'send:' + mode + code + " ";
+//      el.innerHTML = el.innerHTML + ' send:' + mode + code + " ";
     }
 
     function send(code, mode) {
@@ -225,10 +225,11 @@
         return;
       }
       var val = inp.value;
-      if (val.lenth == 0) {
-        // english input
+      if (val.length == 0) {
+	typed_chars = 0;
         return;
       }
+
       // if not paste and not chinese
       if (val.length <= typed_chars
         && val.charCodeAt(0) < 128) {
@@ -264,6 +265,7 @@
       } else {
         ch = e.keyCode;
       }
+
       // firefox and opera hack
       if (ch == 0 || ch == repeat_key_code) {
         send(repeat_key_code, 'D');

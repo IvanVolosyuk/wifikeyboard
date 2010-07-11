@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-<string name="app_name">WiFiKeyboard</string>
+<string name="app_name">無線鍵盤</string>
 
-<string name="desc_setup_wifi">設定 WiFiKeyboard：</string>
+<string name="desc_setup_wifi">設定 無線鍵盤：</string>
 <string name="desc_goto_settings">轉到 設定-&gt;語言 &amp; 鍵盤</string>
-<string name="desc_enable_kbd">在清單中開啟 WiFiKeyboard</string>
+<string name="desc_enable_kbd">在清單中開啟 無線鍵盤</string>
 <string name="desc_toch_input_field">在任何的輸入方塊中點擊並按住保持一秒</string>
-<string name="desc_change_input_method">改變 \"輸入模式\" 為 \"WiFiKeyboard\"</string>
+<string name="desc_change_input_method">改變 \"輸入模式\" 為 \"無線鍵盤\"</string>
 <string name="desc_enable_network">確定你啟用了 WiFi 或 GPRS/3G 網路</string>
 <string name="desc_connect_to_one">連接你的電腦瀏覽器到 http://%s:%d</string>
 <string name="desc_connect_to_any">連接你的電腦瀏覽器到以下任何一個：</string>
@@ -16,26 +16,26 @@
 <string name="desc_cmdline">在命令列介面中輸入 \"adb forward tcp:%d tcp:%d\"</string>
 <string name="desc_connect_local">然後連接你的電腦瀏覽器到 http://localhost:%d</string>
 
-<string name="page_title">WiFi&amp;nbsp;鍵盤</string>
+<string name="page_title">無線鍵盤</string>
 <string name="conn_problem_title">連接問題</string>
 <string name="conn_problem_desc">手機與電腦直接無連接。</string>
 <string name="input_disabled_title">未輸入</string>
-<string name="input_disabled_desc">在你的設備上開啟 WiFiKeyboard 輸入。</string>
+<string name="input_disabled_desc">在你的設備上開啟 無線鍵盤 輸入。</string>
 <string name="input_disabled_link_text">存取說明頁面。</string>
 <!-- ignore the line, I'll add the url myself -->
 <string name="input_disabled_link_url">http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings_zh_TW</string>
-<!-- Please preserve formating of wiki page, "!" sign before WiFiKeyboard disables automatic link creation from WiFiKeyboard because it is WikiWord -->
+<!-- Please preserve formating of wiki page, "!" sign before 無線鍵盤 disables automatic link creation from 無線鍵盤 because it is WikiWord -->
 <string name="help_wiki_page">
-#summary 如何在設備上啟用 !WiFiKeyboard
+#summary 如何在設備上啟用 !無線鍵盤
 
-= 如何在設備上啟用 !WiFiKeyboard =
+= 如何在設備上啟用 !無線鍵盤 =
 
-在你的設備上啟用 !WiFiKeyboard：
+在你的設備上啟用 !無線鍵盤：
   * 在你的設備上找到輸入方式的設定然後啟用它：
      * 在桌面上按Menu鍵
      * 轉至：設定 -&gt; 語言和鍵盤
-     * 勾選 !WiFiKeyboard
-  * 在任何欄位上長按然後選取\"輸入方式\" -&gt; !WiFiKeyboard。
+     * 勾選 !無線鍵盤
+  * 在任何欄位上長按然後選取\"輸入方式\" -&gt; !無線鍵盤。
 </string>
 <string name="input_from_two_devices_title">多設備輸入</string>
 <string name="input_from_two_devices_desc">不支援從多個瀏覽器視窗中輸入。請僅適用一個瀏覽器視窗。</string>
