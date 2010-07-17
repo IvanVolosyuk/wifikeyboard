@@ -203,6 +203,8 @@ public class HttpService extends Service {
     Log.d("wifikeyboard", "onDestroy()");
     server.finish();
     unregisterReceiver(mWifiStateReceiver);
+    TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
+    tm.listen(dataListener, PhoneStateListener.LISTEN_NONE);
     NotificationManager mgr =
       (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
     mgr.cancelAll();
