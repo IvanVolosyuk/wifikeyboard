@@ -20,11 +20,12 @@ public class WiFiInputMethod extends InputMethodService {
   @Override
   public void onStartInput(EditorInfo attribute, boolean restarting) {
     super.onStartInput(attribute, restarting);
-    try {
-      remoteKeyboard.notifyClient();
-    } catch (RemoteException e) {
-      Debug.e("failed communicating to HttpService", e);
-    }
+// FIXME: race condition: the server may not be running yet
+//    try {
+//      remoteKeyboard.notifyClient();
+//    } catch (RemoteException e) {
+//      Debug.e("failed communicating to HttpService", e);
+//    }
   }
 
   ServiceConnection serviceConnection;
@@ -143,6 +144,9 @@ public class WiFiInputMethod extends InputMethodService {
   
   void resetModifiers() {
     InputConnection conn = getCurrentInputConnection();
+    if (conn == null) {
+      return;
+    }
     conn.clearMetaKeyStates(
         KeyEvent.META_ALT_ON | KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON);
   }
