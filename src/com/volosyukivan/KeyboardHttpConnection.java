@@ -6,7 +6,6 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.Map;
-import java.util.SortedMap;
 import java.util.TreeMap;
 
 public final class KeyboardHttpConnection extends HttpConnection {

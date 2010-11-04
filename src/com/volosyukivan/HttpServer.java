@@ -2,8 +2,6 @@ package com.volosyukivan;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SelectableChannel;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
@@ -15,7 +13,7 @@ import android.util.Log;
 
 public abstract class HttpServer extends Thread {
 
-  // syncronized between main and network thread
+  // synchronized between main and network thread
   private boolean isDone;
   
   // private for network thread
@@ -40,6 +38,7 @@ public abstract class HttpServer extends Thread {
     this.event = event;
     if (selector != null) selector.wakeup();
   }
+  
   protected void setResponse(KeyboardHttpConnection con, ByteBuffer out) {
     con.key.interestOps(SelectionKey.OP_WRITE);
     con.outputBuffer = out;
