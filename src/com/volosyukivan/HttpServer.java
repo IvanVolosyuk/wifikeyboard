@@ -9,7 +9,10 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.Set;
 
+import com.volosyukivan.HttpConnection.ConnectionFailureException;
+
 import android.util.Log;
+
 
 public abstract class HttpServer extends Thread {
 
@@ -84,12 +87,12 @@ public abstract class HttpServer extends Thread {
           } else {
             HttpConnection conn = (HttpConnection) key.attachment();
             try {
-              int prevState, newState;
+              HttpConnection.ConnectionState prevState, newState;
               if (key.isReadable()) {
-                prevState = HttpConnection.SELECTOR_WAIT_FOR_NEW_INPUT; 
+                prevState = HttpConnection.ConnectionState.SELECTOR_WAIT_FOR_NEW_INPUT; 
 //                Debug.d("processing read event");
                 long start = System.currentTimeMillis();
-                newState = conn.processReadEvent();
+                newState = conn.newInput();
                 long end = System.currentTimeMillis();
                 Debug.d("delay = " + (end - start));
 
@@ -99,23 +102,27 @@ public abstract class HttpServer extends Thread {
 //                android.os.Debug.startAllocCounting();
 
               } else if (key.isWritable()) {
-                prevState = HttpConnection.SELECTOR_WAIT_FOR_OUTPUT_BUFFER; 
+                prevState = HttpConnection.ConnectionState.SELECTOR_WAIT_FOR_OUTPUT_BUFFER; 
 //                Debug.d("processing write event");
-                newState = conn.processWriteEvent();
+                newState = conn.newOutputBuffer();
                 Log.d("wifikeyboard", "finished write event");
               } else {
                 continue;
               }
               if (newState == prevState) continue;
               key.interestOps(
-                  (newState == HttpConnection.SELECTOR_WAIT_FOR_NEW_INPUT ? SelectionKey.OP_READ : 0) |
-                  (newState == HttpConnection.SELECTOR_WAIT_FOR_OUTPUT_BUFFER ? SelectionKey.OP_WRITE : 0));
+                  (newState == HttpConnection.ConnectionState.SELECTOR_WAIT_FOR_NEW_INPUT ? SelectionKey.OP_READ : 0) |
+                  (newState == HttpConnection.ConnectionState.SELECTOR_WAIT_FOR_OUTPUT_BUFFER ? SelectionKey.OP_WRITE : 0));
             } catch (IOException io) {
 //              Debug.d("CONNECTION CLOSED from " + 
 //                  conn.getClient().socket().getRemoteSocketAddress());
               if (key != null) key.cancel();
               conn.getClient().close();
+            } catch (ConnectionFailureException e) {
+              if (key != null) key.cancel();
+              conn.getClient().close();
             } catch (NumberFormatException e) {
+              // FIXME: move to ConnectionFailureException
               if (key != null) key.cancel();
               conn.getClient().close();
             }
@@ -142,12 +149,20 @@ public abstract class HttpServer extends Thread {
   public synchronized void finish() {
     isDone = true;
     selector.wakeup();
-    while (!finished)
+    // FIXME: remove
+    // FIXME: deadlocks with the sendKey() and it is wrong to block event thread
+    // FIXME: on the other hand if removed the problem is when activity restarted
+    // Make service start stop managment asynchronose to activity
+    // or make this thread management more sophisticated
+    // Like wait for older thread to finish and only after that start new one.
+    // That's require separate thread and http server object
+    while (!finished) {
       try {
         wait();
       } catch (InterruptedException e) {
         break;
       }
+    }
   }
   
   public abstract HttpConnection newConnection(SocketChannel ch);
