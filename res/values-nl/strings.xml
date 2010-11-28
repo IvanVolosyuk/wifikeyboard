@@ -23,7 +23,7 @@
 <string name="input_disabled_desc">Activeer WiFiKeyboard invoer op uw toestel.</string>
 <string name="input_disabled_link_text">Bezoek de help pagina.</string>
 <!-- ignore the line, I'll add the url myself -->
-<string name="input_disabled_link_url">http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings</string>
+<string name="input_disabled_link_url">http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings_nl</string>
 <!-- Please preserve formating of wiki page, "!" sign before WiFiKeyboard disables automatic link creation from WiFiKeyboard because it is WikiWord -->
 <string name="help_wiki_page">
 #summary Hoe !WiFiKeyboard activeren op uw toestel
