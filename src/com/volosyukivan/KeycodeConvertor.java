@@ -56,6 +56,8 @@ public final class KeycodeConvertor {
       // Home
       case 36: return KeyEvent.KEYCODE_HOME;
       case 113: return KeyEvent.KEYCODE_MENU;
+      
+      case 114: return KeyEvent.KEYCODE_SEARCH;
       // case x: return KeyEvent.KEYCODE_CALL;
       // case x: return KeyEvent.KEYCODE_ENDCALL;
       

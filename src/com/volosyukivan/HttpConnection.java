@@ -9,9 +9,12 @@ import java.util.Arrays;
 import android.util.Log;
 
 public abstract class HttpConnection {
+  // Selector data
   private static final int BUFSIZE = 1024;
   SelectionKey key;
   private SocketChannel ch;
+  
+  // Stream connection fields
   ByteBuffer outputBuffer;
   private ByteBuffer in;
   {
@@ -80,6 +83,9 @@ public abstract class HttpConnection {
     EXECUTE_REQUEST
   };
   
+  // Http connection fields
+  
+  // Buffer references
   private byte[] data;
   private int offset;
   private int limit;
@@ -101,14 +107,16 @@ public abstract class HttpConnection {
           break;
         case LOOK_REQUEST_HEADERS:
           isPost = request[0] == LETTER_P;
-          headerMatcher = lookupRequestHandler();
+          requestHandler = lookupRequestHandler();
+          headerMatcher = requestHandler.headerMatcher;
           if (headerMatcher == null)
             httpConnectionState = HttpConnectionState.SKIP_HEADERS;
-          else
+          else {
             httpConnectionState = HttpConnectionState.READ_HEADER;
-          int numHeaders = headerMatcher.patterns.length;
-          for (int i = 0; i < numHeaders; i++) {
-            headerLen[i] = 0;
+            int numHeaders = headerMatcher.patterns.length;
+            for (int i = 0; i < numHeaders; i++) {
+              headerLen[i] = 0;
+            }
           }
           break;
         case READ_HEADER:
@@ -120,8 +128,7 @@ public abstract class HttpConnection {
           httpConnectionState = skipHeaders();
           break;
         case CONSIDER_FORM_DATA:
-          if (isPost) httpConnectionState = HttpConnectionState.READ_FORM_DATA;
-          else httpConnectionState = HttpConnectionState.EXECUTE_REQUEST;
+          httpConnectionState = considerFormData();
           break;
         case READ_FORM_DATA:
           if (offset == limit) break exit;
@@ -143,8 +150,8 @@ public abstract class HttpConnection {
   private static final byte LETTER_COLUMN = ":".getBytes()[0];
   private static final byte LETTER_CR = "\n".getBytes()[0];
   
-  byte[] request = new byte[BUFSIZE];
-  int requestLength = 0;
+  protected byte[] request = new byte[BUFSIZE];
+  protected int requestLength = 0;
   
   private HttpConnectionState readRequest() {
     int limit = this.limit;
@@ -183,11 +190,11 @@ public abstract class HttpConnection {
     NO_MORE_HEADERS
   }
 
-  HeaderState headerState = HeaderState.MATCH_HEADER_NAME;
-  byte[][] header = new byte[2][256];
-  int[] headerLen = new int[2];
-  byte[] currentHeader;
-  int currentHeaderLen;
+  private HeaderState headerState = HeaderState.MATCH_HEADER_NAME;
+  protected byte[][] header = new byte[2][256];
+  protected int[] headerLen = new int[2];
+  private byte[] currentHeader;
+  private int currentHeaderLen;
 
   private HttpConnectionState readHeader() {
     while (offset != limit) {
@@ -337,7 +344,7 @@ public abstract class HttpConnection {
   }
 
   
-  int skipLineLen = 0;
+  private int skipLineLen = 0;
   private HttpConnectionState skipHeaders() {
     byte[] data = this.data;
     int skipLineLen = this.skipLineLen;
@@ -362,46 +369,87 @@ public abstract class HttpConnection {
   }
   
   
-  // FIXME: temporary
-  HeaderMatcher tmpHeaderMatcher = new HeaderMatcher("Accept-Language","Accept-Encoding");
+  private RequestHandler requestHandler;
   
-  private HeaderMatcher lookupRequestHandler() {
-    return tmpHeaderMatcher;
-  }
+//  = new RequestHandler(new HeaderMatcher("Accept-Language","Accept-Encoding")) {
+//    @Override
+//    public ByteBuffer processQuery(byte[] query, int offset, int limit) {
+//      return null;
+//    }
+//  };
+  
+  public abstract RequestHandler lookupRequestHandler();
   
   // FIXME: dummy form data implementation
-  byte[] formData = new byte[BUFSIZE];
-  int formDataLength = 0;
+  private byte[] formData = new byte[BUFSIZE];
+  private int formDataLength = 0;
+  private int formDataExpectedLength = 0;
 
   private HttpConnectionState readFormData() {
     byte[] data = this.data;
     int limit = this.limit;
     int formDataLength = this.formDataLength;
+    int formDataExpectedLength = this.formDataExpectedLength;
     
     for (int i = offset; i < limit; i++) {
       byte b = data[i];
-      if (b == LETTER_CR) {
+      try {
+        formData[formDataLength++] = b;
+      } catch (ArrayIndexOutOfBoundsException e) {
+        throw new ConnectionFailureException("request is too large");
+      }
+      if (formDataLength == formDataExpectedLength) {
         // request end
         this.formDataLength = formDataLength;
         this.offset = i + 1;
         Log.d("wifikeyboard", "Form data: " + new String(formData, 0, formDataLength));
         return HttpConnectionState.EXECUTE_REQUEST;
       } else {
-        try {
-          formData[formDataLength++] = b;
-        } catch (ArrayIndexOutOfBoundsException e) {
-          throw new ConnectionFailureException("request is too large");
-        }
       }
     }
     this.offset = limit;
     this.formDataLength = formDataLength;
     return HttpConnectionState.READ_FORM_DATA;
   }
-
+  
+  private static final byte[] ACCEPTED_CONTENT_TYPE =
+    "application/x-www-form-urlencoded".getBytes();
+  private static byte LETTER_ZERO = "0".getBytes()[0];
+  
+  private HttpConnectionState considerFormData() {
+    if (!isPost) {
+      return HttpConnectionState.EXECUTE_REQUEST;
+    }
+    
+    byte[] contentType = header[0]; 
+    if (ACCEPTED_CONTENT_TYPE.length != headerLen[0]) {
+      throw new ConnectionFailureException("unsupported content type");
+    }
+    int len = ACCEPTED_CONTENT_TYPE.length;
+    for (int i = 0; i < len; i++) {
+      if (ACCEPTED_CONTENT_TYPE[i] != contentType[i])
+        throw new ConnectionFailureException("unsupported content type");
+    }
+    
+    int contentLen = 0;
+    len = headerLen[1];
+    byte[] contentLenHeader = header[1];
+    for (int i = 0; i < len; i++) {
+      contentLen = (contentLen * 10) + contentLenHeader[i] - LETTER_ZERO;
+    }
+    
+    this.formDataExpectedLength = contentLen;
+    
+    if (contentLen == 0) {
+      return HttpConnectionState.EXECUTE_REQUEST;
+    }
+    return HttpConnectionState.READ_FORM_DATA;
+  }
+  
   private ConnectionState executeRequest() throws IOException {
-    String req = parseRequest(new String(request, 0, requestLength));
-    ByteBuffer output = processRequest(req);
+    ByteBuffer output = requestHandler.processQuery();
+//    String req = parseRequest(new String(request, 0, requestLength));
+//    ByteBuffer output = processRequest(req);
     // Cleanup
     requestLength = 0;
     
@@ -420,11 +468,10 @@ public abstract class HttpConnection {
     return ConnectionState.SELECTOR_WAIT_FOR_NEW_INPUT;
   }
   
-  class HeaderMatcher {
+  static class HeaderMatcher {
     byte[][] patterns;
     int[] similarity;
     public HeaderMatcher(String...strings) {
-      Arrays.sort(strings);
       patterns = new byte[strings.length][];
       similarity = new int[strings.length];
       String prevString = null;
@@ -445,23 +492,34 @@ public abstract class HttpConnection {
       }
     }
   };
-
-  private String parseRequest(String line) {
-    String[] parts = line.split(" ");
-    if (parts.length != 3) {
-      throw new ConnectionFailureException("malformed req: " + line);
+  
+  abstract static class RequestHandler {
+    public final HeaderMatcher headerMatcher;
+    
+    public RequestHandler(HeaderMatcher headerMatcher) {
+      this.headerMatcher = headerMatcher;
     }
-    String url = parts[1];
-    String[] urlParts = url.split("/", -2);
-    return urlParts[urlParts.length - 1];
-  }
+    public abstract ByteBuffer processQuery();
+  };
 
-  /**
-   * Obtain response for the request.
-   * @param url
-   * @return
-   */
-  protected abstract ByteBuffer processRequest(String url);
+//  @Deprecated
+//  private String parseRequest(String line) {
+//    String[] parts = line.split(" ");
+//    if (parts.length != 3) {
+//      throw new ConnectionFailureException("malformed req: " + line);
+//    }
+//    String url = parts[1];
+//    String[] urlParts = url.split("/", -2);
+//    return urlParts[urlParts.length - 1];
+//  }
+
+//  /**
+//   * Obtain response for the request.
+//   * @param url
+//   * @return
+//   */
+//  @Deprecated
+//  protected abstract ByteBuffer processRequest(String url);
 
   public void setKey(SelectionKey clientkey) {
     this.key = clientkey;

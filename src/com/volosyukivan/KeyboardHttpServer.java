@@ -9,6 +9,7 @@ import java.util.ArrayList;
 
 import android.os.Handler;
 import android.os.RemoteException;
+import android.util.Log;
 
 public final class KeyboardHttpServer extends HttpServer {
   private HttpService service;
@@ -88,6 +89,7 @@ public final class KeyboardHttpServer extends HttpServer {
   boolean sendKey(final int code0, final boolean pressed) {
     delivered = false;
     final int code = convertKey(code0);
+//    Log.d("wifikeyboard", "in: " + code0 + " out:" + code);
     handler.post(new Runnable() {
       @Override
       public void run() {

@@ -5,18 +5,161 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
 public final class KeyboardHttpConnection extends HttpConnection {
 
   private KeyboardHttpServer server;
+  
+    private byte[][] patterns;
+    RequestHandler[] handlers;
 
-  public KeyboardHttpConnection(KeyboardHttpServer server, SocketChannel ch) {
+  public KeyboardHttpConnection(final KeyboardHttpServer server, SocketChannel ch) {
     super(ch);
     this.server = server;
+    class HandlerInit {
+      ArrayList<byte[]> patterns = new ArrayList<byte[]>();
+      ArrayList<RequestHandler> handlers = new ArrayList<RequestHandler>();
+      
+      public void add(String pattern, RequestHandler handler) {
+        patterns.add(pattern.getBytes());
+        handlers.add(handler);
+      }
+    };
+    HandlerInit handler = new HandlerInit();
+
+    handler.add("key", new RequestHandler(null) {
+      @Override
+      public ByteBuffer processQuery() {
+        String response = server.processKeyRequest(
+            new String(request, cmdEnd + 1, queryEnd));
+        
+        Map<String, ByteBuffer> cache = responseCache.get();
+        if (cache == null) {
+          cache = new TreeMap<String, ByteBuffer>();
+          responseCache.set(cache);
+        }
+        
+        ByteBuffer buffer = cache.get(response);
+        if (buffer != null) {
+          buffer.position(0);
+          return buffer;
+        }
+//        Debug.d(response);
+        byte[] content = response.getBytes();
+        buffer = sendData("text/plain", content, content.length);
+        cache.put(response, buffer);
+        return buffer;
+      }
+    });
+    
+    // Default page
+    handler.add("", new RequestHandler(null) {
+      @Override
+      public ByteBuffer processQuery() {
+        String page = server.getPage();
+        try {
+          byte[] content = page.getBytes("UTF-8");
+          server.sendKey(KeyboardHttpServer.FOCUS, true);
+          return sendData("text/html; charset=UTF-8", content, content.length);
+        } catch (UnsupportedEncodingException e) {
+          throw new RuntimeException("UTF-8 unsupported");
+        }
+      }
+    });
+    
+    handler.add("wait", new RequestHandler(null) {
+      @Override
+      public ByteBuffer processQuery() {
+        server.waitingConnections.add(KeyboardHttpConnection.this);
+        return null;
+      }
+    });
+    
+    handler.add("bg.gif", new RequestHandler(null) {
+      @Override
+      public ByteBuffer processQuery() {
+        return sendImage(R.raw.bg);
+      }
+    });
+    
+    handler.add("icon.png", new RequestHandler(null) {
+      @Override
+      public ByteBuffer processQuery() {
+        return sendImage(R.raw.icon);
+      }
+    });
+    
+    handler.add("form", new RequestHandler(new HeaderMatcher(
+        "Content-Type", "Content-Length"
+    )) {
+      @Override
+      public ByteBuffer processQuery() {
+        byte[] resp = ("Header1: "
+          + new String(header[0], 0, headerLen[0])
+          + "\nHeader2: " + new String(header[1], 0, headerLen[1])).getBytes();
+        return sendData("text/plain", resp, resp.length);
+      }
+    });
+    
+    this.handlers = handler.handlers.toArray(new RequestHandler[0]);
+    this.patterns = handler.patterns.toArray(new byte[0][0]);
   }
   
+  private static final byte LETTER_SPACE = " ".getBytes()[0];
+  private static final byte LETTER_SLASH = "/".getBytes()[0];
+  private static final byte LETTER_QUESTION = "?".getBytes()[0];
+  private int queryEnd;
+  private int cmdEnd;
+  
+  @Override
+  public RequestHandler lookupRequestHandler() {
+    byte[] request = this.request;
+    
+    queryEnd = 0;
+    for (int i = requestLength - 1; i >= 0; i--) {
+      if (request[i] == LETTER_SPACE) {
+        queryEnd = i;
+        break;
+      }
+    }
+    
+    int cmdStart = 0;
+    for (int i = queryEnd; i >= 0; i--) {
+      if (request[i] == LETTER_SLASH) {
+        cmdStart = i + 1;
+        break;
+      }
+    }
+    
+    cmdEnd = queryEnd;
+    for (int i = cmdStart; i < queryEnd; i++) {
+      if (request[i] == LETTER_QUESTION) {
+        cmdEnd = i;
+        break;
+      }
+    }
+    
+    int nhandlers = handlers.length;
+    int cmdLen = cmdEnd - cmdStart;
+    outer:
+    for (int i = 0; i < nhandlers; i++) {
+      byte[] pattern = patterns[i];
+      if (pattern.length != cmdLen) {
+        continue;
+      }
+      
+      for (int j = 0; j < cmdLen; j++) {
+        if (pattern[j] != request[j + cmdStart]) continue outer; 
+      }
+      return handlers[i];
+    }
+    
+    return handlers[0];
+  }
+ 
   public ByteBuffer sendData(
       String content_type,
       byte[] content,
@@ -43,63 +186,64 @@ public final class KeyboardHttpConnection extends HttpConnection {
     }
   }
 
-  protected ByteBuffer processRequest(String req) {
-//    Debug.d("got key event: " + req);
-
-
-    if (req.equals("")) {
-//      Debug.d("sending html page");
-      String page = server.getPage();
-      try {
-        byte[] content = page.getBytes("UTF-8");
-        server.sendKey(KeyboardHttpServer.FOCUS, true);
-        return sendData("text/html; charset=UTF-8", content, content.length);
-      } catch (UnsupportedEncodingException e) {
-        throw new RuntimeException("UTF-8 unsupported");
-      }
-    }
-    
-    if (req.equals("wait")) {
-      server.waitingConnections.add(this);
-      return null;
-    }
-
-    if (req.equals("bg.gif")) {
-      return sendImage(R.raw.bg);
-    }
-
-    if (req.equals("icon.png")) {
-      return sendImage(R.raw.icon);
-    }
-    
-    if (req.equals("test")) {
-      StringBuilder res = new StringBuilder();
-      for (int i = 0; i < 10000; i++) {
-        res.append("Quick brown fox jump over lazy dog.\n");
-      }
-      String r = res.toString();
-      return sendData("text/plain", r.getBytes(), r.getBytes().length);
-    }
-
-    String response = server.processKeyRequest(req);
-    
-    Map<String, ByteBuffer> cache = responseCache.get();
-    if (cache == null) {
-      cache = new TreeMap<String, ByteBuffer>();
-      responseCache.set(cache);
-    }
-    
-    ByteBuffer buffer = cache.get(response);
-    if (buffer != null) {
-      buffer.position(0);
-      return buffer;
-    }
-//    Debug.d(response);
-    byte[] content = response.getBytes();
-    buffer = sendData("text/plain", content, content.length);
-    cache.put(response, buffer);
-    return buffer;
-  }
+//  protected ByteBuffer processRequest(String req) {
+////    Debug.d("got key event: " + req);
+//
+//
+//    if (req.equals("")) {
+////      Debug.d("sending html page");
+//      String page = server.getPage();
+//      try {
+//        byte[] content = page.getBytes("UTF-8");
+//        server.sendKey(KeyboardHttpServer.FOCUS, true);
+//        return sendData("text/html; charset=UTF-8", content, content.length);
+//      } catch (UnsupportedEncodingException e) {
+//        throw new RuntimeException("UTF-8 unsupported");
+//      }
+//    }
+//    
+//    if (req.equals("wait")) {
+//      server.waitingConnections.add(this);
+//      return null;
+//    }
+//
+//    if (req.equals("bg.gif")) {
+//      return sendImage(R.raw.bg);
+//    }
+//
+//    if (req.equals("icon.png")) {
+//      return sendImage(R.raw.icon);
+//    }
+//    
+//    if (req.equals("test")) {
+//      StringBuilder res = new StringBuilder();
+//      for (int i = 0; i < 10000; i++) {
+//        res.append("Quick brown fox jump over lazy dog.\n");
+//      }
+//      String r = res.toString();
+//      return sendData("text/plain", r.getBytes(), r.getBytes().length);
+//    }
+//
+//    String response = server.processKeyRequest(req);
+//    
+//    Map<String, ByteBuffer> cache = responseCache.get();
+//    if (cache == null) {
+//      cache = new TreeMap<String, ByteBuffer>();
+//      responseCache.set(cache);
+//    }
+//    
+//    ByteBuffer buffer = cache.get(response);
+//    if (buffer != null) {
+//      buffer.position(0);
+//      return buffer;
+//    }
+////    Debug.d(response);
+//    byte[] content = response.getBytes();
+//    buffer = sendData("text/plain", content, content.length);
+//    cache.put(response, buffer);
+//    return buffer;
+//  }
+  
   private static ThreadLocal<Map<String,ByteBuffer>> responseCache =
     new ThreadLocal<Map<String,ByteBuffer>>();
 }

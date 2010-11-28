@@ -152,7 +152,7 @@
 	setDisplayState("failure");
 	makeXhr();
       }, 3000);
-      xhr.open('GET', "/" + newConfirmed + "," + data, true);
+      xhr.open('GET', "/key?" + newConfirmed + "," + data, true);
       xhr.send(null);
       return xhr;
     }
@@ -380,7 +380,7 @@
   <div class="mode"><input type="radio" name="mode" value="c">Game mode (key codes only)</div>
   </form>
   </td></tr></tbody></table>
-  
+  <!-- 
   <br>
   <br>
   <form method="post" action="/form">
@@ -388,7 +388,7 @@
       <textarea name="text" cols="100" rows="20">
       </textarea>
       <input type="submit" value="Submit (Esc)">
-  </form>
+  </form>-->
 
 <!-- Main Window End -->
 </td><td align="right">
@@ -407,6 +407,7 @@
   <li>Arrows = DPAD Arrows</li>
   <li>Insert or F1 = DPAD Center</li>
   <li>F2 = Menu</li>
+  <li>F3 = Search</li>
   <li>Escape = BACK</li>
   <li>F9, F10 = Volume control</li>
   </ul>
