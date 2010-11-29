@@ -26,8 +26,7 @@ public class HttpService extends Service {
   RemoteKeyListener listener;
   String htmlpage;
   int port;
-  ServerSocketChannel socket;
-  KeyboardHttpServer server;
+  static KeyboardHttpServer server;
   private static boolean isRunning = false;
   private IntentFilter mWifiStateFilter;
   private PhoneStateListener dataListener = new PhoneStateListener() {
@@ -65,8 +64,17 @@ public class HttpService extends Service {
       return port;
     }
     @Override
-    public void notifyClient() throws RemoteException {
-      server.notifyClient();
+    public void startTextEdit(String content) throws RemoteException {
+      // FIXME: add args
+      if (server != null)
+        server.notifyClient(content);
+    }
+    
+    @Override
+    public void stopTextEdit() throws RemoteException {
+      // FIXME: add args
+      if (server != null)
+        server.notifyClient(null);
     }
   };
   
@@ -102,10 +110,10 @@ public class HttpService extends Service {
     }
   };
   
-  private ServerSocketChannel makeSocket() {
+  private static ServerSocketChannel makeSocket(Context context) {
     ServerSocketChannel ch;
     
-    SharedPreferences prefs = getSharedPreferences("port", MODE_PRIVATE);
+    SharedPreferences prefs = context.getSharedPreferences("port", MODE_PRIVATE);
     int savedPort = prefs.getInt("port", 7777);
 
     try {
@@ -155,19 +163,11 @@ public class HttpService extends Service {
     Log.d("wifikeyboard", "onCreate()");
     super.onCreate();
     if (isRunning) return;
-    socket = makeSocket();
-    port = socket.socket().getLocalPort();
-    Editor editor = getSharedPreferences("port", MODE_PRIVATE).edit();
-    editor.putInt("port", port);
-    editor.commit();
-    updateNotification(true);
-    
     
     registerReceiver(mWifiStateReceiver, mWifiStateFilter);
     TelephonyManager t = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
     t.listen(dataListener, PhoneStateListener.LISTEN_DATA_CONNECTION_STATE);
 
-    server = new KeyboardHttpServer(this, socket);
     InputStream is = getResources().openRawResource(R.raw.key);
     int pagesize = 32768;
     byte[] data = new byte[pagesize];
@@ -193,12 +193,13 @@ public class HttpService extends Service {
       page.replace(pos, pos + 9, getString(res));
     }
     htmlpage = page.toString();
-    server.start();
+    startServer(this);
   }
   
   @Override
   public void onDestroy() {
     isRunning = false;
+    onServerFinish = null;
 //    stopForeground(true);
     Log.d("wifikeyboard", "onDestroy()");
     server.finish();
@@ -215,5 +216,38 @@ public class HttpService extends Service {
   @Override
   public IBinder onBind(Intent intent) {
     return mBinder;
+  }
+
+  private static Runnable onServerFinish = null;
+  
+  public static void doStartServer(HttpService context) {
+    ServerSocketChannel socket = makeSocket(context);
+    context.port = socket.socket().getLocalPort();
+    server = new KeyboardHttpServer(context, socket);
+    Editor editor = context.getSharedPreferences("port", MODE_PRIVATE).edit();
+    editor.putInt("port", context.port);
+    editor.commit();
+    context.updateNotification(true);
+    server.start();
+  }
+  
+  public static void startServer(final HttpService context) {
+    if (server == null) {
+      doStartServer(context);
+    } else {
+      onServerFinish = new Runnable() {
+        @Override
+        public void run() {
+          doStartServer(context);
+        }
+      };
+    }
+  }
+  
+  public void networkServerFinished() {
+    server = null;
+    if (onServerFinish != null) {
+      onServerFinish.run();
+    }
   }
 }

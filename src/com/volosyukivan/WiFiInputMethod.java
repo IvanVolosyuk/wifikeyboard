@@ -14,18 +14,21 @@ import android.os.PowerManager;
 import android.os.RemoteException;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 
 public class WiFiInputMethod extends InputMethodService {
   @Override
   public void onStartInput(EditorInfo attribute, boolean restarting) {
     super.onStartInput(attribute, restarting);
-// FIXME: race condition: the server may not be running yet
-//    try {
-//      remoteKeyboard.notifyClient();
-//    } catch (RemoteException e) {
-//      Debug.e("failed communicating to HttpService", e);
-//    }
+    try {
+      String text = getText();
+      remoteKeyboard.startTextEdit(text);
+    } catch (RemoteException e) {
+      Debug.e("failed communicating to HttpService", e);
+    } catch (NullPointerException e) {
+      Debug.e("remoteKeyboard is not connected yet", e);
+    }
   }
 
   ServiceConnection serviceConnection;
@@ -74,6 +77,14 @@ public class WiFiInputMethod extends InputMethodService {
             public void charEvent(int code) throws RemoteException {
               // Debug.d("got key in WiFiInputMethod");
               receivedChar(code);
+            }
+            @Override
+            public boolean setText(String text) throws RemoteException {
+              return WiFiInputMethod.this.setText(text);
+            }
+            @Override
+            public String getText() throws RemoteException {
+              return WiFiInputMethod.this.getText();
             }
           };
           RemoteKeyboard.Stub.asInterface(service).registerKeyListener(keyboardListener);
@@ -171,5 +182,35 @@ public class WiFiInputMethod extends InputMethodService {
       conn.clearMetaKeyStates(
           KeyEvent.META_ALT_ON | KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON);
     }
+  }
+  
+  boolean setText(String text) {
+    // FIXME: need feedback if the input was lost
+    InputConnection conn = getCurrentInputConnection();
+    if (conn == null) {
+//      Debug.d("connection closed");
+      return false;
+    }
+    conn.beginBatchEdit();
+    // FIXME: hack
+    conn.deleteSurroundingText(100000, 100000);
+    conn.commitText(text, text.length());
+    conn.endBatchEdit();
+    return true;
+  }
+  
+  String getText() {
+    String text = "";
+    try {
+      InputConnection conn = getCurrentInputConnection();
+      ExtractedTextRequest req = new ExtractedTextRequest();
+      req.hintMaxChars = 1000000;
+      req.hintMaxLines = 10000;
+      req.flags = 0;
+      req.token = 1;
+      text = conn.getExtractedText(req, 0).text.toString();
+    } catch (Throwable t) {
+    }
+    return text;
   }
 }

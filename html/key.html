@@ -79,15 +79,18 @@
 	  // FIXME: error handling
 	  setTimeout("makeNotificationListener();", 2000);
 	}
-        if (receiver.responseText != "") {
-          // debug = document.getElementById("debug");
-	  // debug.innerHTML = receiver.responseText;
+        if (receiver.responseText != undefined) {
+          textarea = document.getElementById("text");
+	  textarea.value = receiver.responseText;
+	  textarea.focus();
 	}
 	makeNotificationListener();
       }
-      receiver.open('GET', "/listen", true);
+      receiver.open('GET', "/wait", true);
       receiver.send(null);
     }
+
+    // makeNotificationListener();
 
     function makeXhr() {
       var xhr = new XMLHttpRequest();
@@ -251,6 +254,11 @@
     function down(e) {
       update_input();
       if (!e) e = window.event;
+      if (e.keyCode == 115) {
+        no_input();
+        recv_text();
+        return false;
+      }
       return keyevent(e.keyCode, 'D');
     }
     function press(e) {
@@ -307,8 +315,94 @@
       }
     }
 
+    function submit_text() {
+        submitter = new XMLHttpRequest();
+        submitter.onreadystatechange = function() {
+  	  if (submitter.readyState != 4) return;
+            if (submitter.status != 200 || submitter.responseText != "ok") {
+  	    // FIXME: error handling
+  	    setTimeout("submit_text();", 2000);
+          } else {
+            document.getElementById('in').focus();
+            direct_input();
+  	  }
+        }
+        params = document.getElementById("in").value;
+        submitter.open('POST', "/form", true);
+        submitter.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        submitter.setRequestHeader("Content-length", params.length);
+        submitter.send(params);
+      }
+
+    function direct_input() {
+        window.onkeydown = down;
+        window.onkeyup = up;
+        window.onkeypress = press;
+        window.onblur = function() {
+            send(1024,'D');
+        }
+        window.onfocus = focus_me;
+        window.onmouseup = function() {
+            setTimeout('examine_input();', 10);
+        };
+        window.onmouseover = function() {
+            setTimeout('examine_input();', 10);
+        };
+        n = document.getElementById("in");
+        n.style.backgroundColor = "#f1f1ed";
+        n.value = "";
+        
+    }
+
+    function no_input() {
+        document.getElementById("in").style.backgroundColor = "#f1e1cd";
+        window.onkeydown = function(e) { return false; }
+        window.onkeypress = function() { return false; }
+        window.onkeyup = function() { return false; }
+        window.onblur = function() {}
+        window.onmouseup = function() {};
+        window.onmouseover = function() {};
+        
+    }
+
+    function local_input() {
+        document.getElementById("in").style.backgroundColor = "#FFFFFF";
+        window.onkeydown = function(e) {
+            if (!e) e = window.event;
+            if (e.keyCode == 115) {
+                submit_text();
+                no_input();
+                return false;
+            }
+          return true;
+        }
+        window.onkeypress = function() { return true; }
+        window.onkeyup = function() { return true; }
+    }
+
+    function recv_text() {
+        recvText = new XMLHttpRequest();
+        recvText.onreadystatechange = function() {
+  	  if (recvText.readyState != 4) return;
+            if (recvText.status != 200) {
+  	    // FIXME: error handling
+  	    setTimeout("recv_text();", 2000);
+          }
+          if (recvText.responseText != undefined) {
+              document.getElementById('in').value = recvText.responseText;
+              local_input();
+  	  }
+        }
+        params = document.getElementById("in").value;
+        recvText.open('GET', "/text", true);
+        recvText.send(null);
+    }
+    
+
     function loadFinished() {
+      focus_me();
       send(1024, 'D');
+      direct_input();
     }
     window.onload = loadFinished;
 </script>
@@ -354,25 +448,13 @@
    }
 </style>
 </head>
-<body id="myBody"
-   onkeydown="return down(event);"
-   onkeyup="return up(event);"
-   onkeypress="return press(event);"
-   onblur="send(1024,'D');"
-   onfocus="focus_me();"
-   onmouseup="setTimeout('examine_input();', 10);"
-   onmouseover="setTimeout('examine_input();', 10);"
-   onload="focus_me();send(1024, 'D');">
+<body id="myBody">
 <table class="main" align="center">
 <tbody>
 <tr valign="top">
 <td class="main" width="450">
 <!-- Main Window -->
 <h1>WiFi&nbsp;Keyboard</h1>
-  <h2>Android input (type or paste here):
-  <input id="in" type="text" value="" style="width:100%">
-  </h2>
-
   <table border="0"><tbody><tr><td cellspacing="50" cellpadding="50">
   <form name="f">
   <h2>Keyboard mode:</h2>
@@ -380,26 +462,13 @@
   <div class="mode"><input type="radio" name="mode" value="c">Game mode (key codes only)</div>
   </form>
   </td></tr></tbody></table>
-  <!-- 
-  <br>
-  <br>
-  <form method="post" action="/form">
-      <input type="hidden" name="name" value="value">
-      <textarea name="text" cols="100" rows="20">
-      </textarea>
-      <input type="submit" value="Submit (Esc)">
-  </form>-->
 
 <!-- Main Window End -->
-</td><td align="right">
-<!-- Side bar -->
-  <table border="1" cellpadding="20"><tbody><tr><td cellspacing="50" cellpadding="50">
-  <h2>Status: <font color="black" id="status">Connecting...</font></h2>
-  <div id="comment"></div>
-  </td></tr></tbody></table>
-
-  <br>
+</td>
+<td width="50%">
   <table border="0"><tbody><tr><td cellspacing="50" cellpadding="50">
+  <tr>
+  <td>
   <h2>Special keys:</h2>
   <ul>
   <li>Shift = Shift</li>
@@ -410,13 +479,32 @@
   <li>F3 = Search</li>
   <li>Escape = BACK</li>
   <li>F9, F10 = Volume control</li>
+  <li><font color="red">F4 = Edit locally/ submit (alpha)</font></li>
   </ul>
   </td></tr></tbody></table>
-<!-- Side bar end -->
+</td>
+<td align="right">
+<!-- Side bar -->
+  <table border="1" cellpadding="20"><tbody><tr><td cellspacing="50" cellpadding="50">
+  <h2>Status: <font color="black" id="status">Connecting...</font></h2>
+  <div id="comment"></div>
+  </td></tr></tbody></table>
+
+  <br>
 </td>
 </tr>
-<tr valign="bottom">
-<td colspan="2">
+<tr>
+<td colspan="3">
+  <h2>Android input (type or paste here):</h2>
+  <form method="post" action="/form">
+      <input type="hidden" name="name" value="value">
+      <textarea name="text" cols="100" rows="20" id="in"></textarea>
+  </form>
+
+</td>
+</tr>
+<tr>
+<td colspan="3">
   <div class="footer"><a href="http://code.google.com/p/wifikeyboard/">Source code available (license GPL v2).</a><br>Created by Ivan Volosyuk on 2010.</div>
 <!-- <div id="keys">Debug: key presses:</div> -->
 <!-- <div id="debug">New event placeholder.</div> -->
@@ -424,5 +512,6 @@
 </tr>
 </tbody>
 </table>
+
 </body>
 </html>

@@ -9,6 +9,8 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
 
+import android.util.Log;
+
 public final class KeyboardHttpConnection extends HttpConnection {
 
   private KeyboardHttpServer server;
@@ -19,6 +21,8 @@ public final class KeyboardHttpConnection extends HttpConnection {
   public KeyboardHttpConnection(final KeyboardHttpServer server, SocketChannel ch) {
     super(ch);
     this.server = server;
+    // This initalization should be done only once, but it references 'server',
+    // too bad, need to look at this
     class HandlerInit {
       ArrayList<byte[]> patterns = new ArrayList<byte[]>();
       ArrayList<RequestHandler> handlers = new ArrayList<RequestHandler>();
@@ -73,10 +77,27 @@ public final class KeyboardHttpConnection extends HttpConnection {
     handler.add("wait", new RequestHandler(null) {
       @Override
       public ByteBuffer processQuery() {
-        server.waitingConnections.add(KeyboardHttpConnection.this);
+        server.addWaitingConnection(KeyboardHttpConnection.this);
         return null;
       }
     });
+    
+    handler.add("text", new RequestHandler(null) {
+      @Override
+      public ByteBuffer processQuery() {
+        byte[] text = null;
+        try {
+          text = ((String)(server.getText())).getBytes("UTF-8");
+        } catch (UnsupportedEncodingException e) {
+        }
+        if (text == null) {
+          // FIXME: error handling?
+          text = new byte[0];
+        }
+        return sendData("text/plain; charset=UTF-8", text, text.length);
+      }
+    });
+
     
     handler.add("bg.gif", new RequestHandler(null) {
       @Override
@@ -97,9 +118,15 @@ public final class KeyboardHttpConnection extends HttpConnection {
     )) {
       @Override
       public ByteBuffer processQuery() {
-        byte[] resp = ("Header1: "
-          + new String(header[0], 0, headerLen[0])
-          + "\nHeader2: " + new String(header[1], 0, headerLen[1])).getBytes();
+        String newText = "";
+        try {
+          newText = new String(formData, 0, formDataLength, "UTF-8");
+        } catch (UnsupportedEncodingException e) {
+          Log.e("wifikeyboard", "UTF-8", e);
+        }
+        boolean success = server.replaceText(newText);
+        // FIXME: use cached value
+        byte[] resp = (success ? "ok" : "fail").getBytes();
         return sendData("text/plain", resp, resp.length);
       }
     });
@@ -185,64 +212,6 @@ public final class KeyboardHttpConnection extends HttpConnection {
       throw new RuntimeException("failed to load resource");
     }
   }
-
-//  protected ByteBuffer processRequest(String req) {
-////    Debug.d("got key event: " + req);
-//
-//
-//    if (req.equals("")) {
-////      Debug.d("sending html page");
-//      String page = server.getPage();
-//      try {
-//        byte[] content = page.getBytes("UTF-8");
-//        server.sendKey(KeyboardHttpServer.FOCUS, true);
-//        return sendData("text/html; charset=UTF-8", content, content.length);
-//      } catch (UnsupportedEncodingException e) {
-//        throw new RuntimeException("UTF-8 unsupported");
-//      }
-//    }
-//    
-//    if (req.equals("wait")) {
-//      server.waitingConnections.add(this);
-//      return null;
-//    }
-//
-//    if (req.equals("bg.gif")) {
-//      return sendImage(R.raw.bg);
-//    }
-//
-//    if (req.equals("icon.png")) {
-//      return sendImage(R.raw.icon);
-//    }
-//    
-//    if (req.equals("test")) {
-//      StringBuilder res = new StringBuilder();
-//      for (int i = 0; i < 10000; i++) {
-//        res.append("Quick brown fox jump over lazy dog.\n");
-//      }
-//      String r = res.toString();
-//      return sendData("text/plain", r.getBytes(), r.getBytes().length);
-//    }
-//
-//    String response = server.processKeyRequest(req);
-//    
-//    Map<String, ByteBuffer> cache = responseCache.get();
-//    if (cache == null) {
-//      cache = new TreeMap<String, ByteBuffer>();
-//      responseCache.set(cache);
-//    }
-//    
-//    ByteBuffer buffer = cache.get(response);
-//    if (buffer != null) {
-//      buffer.position(0);
-//      return buffer;
-//    }
-////    Debug.d(response);
-//    byte[] content = response.getBytes();
-//    buffer = sendData("text/plain", content, content.length);
-//    cache.put(response, buffer);
-//    return buffer;
-//  }
   
   private static ThreadLocal<Map<String,ByteBuffer>> responseCache =
     new ThreadLocal<Map<String,ByteBuffer>>();

@@ -6,28 +6,28 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Set;
 
 import com.volosyukivan.HttpConnection.ConnectionFailureException;
 
+import android.os.Handler;
 import android.util.Log;
 
 
 public abstract class HttpServer extends Thread {
 
-  // synchronized between main and network thread
-  private boolean isDone;
-  
   // private for network thread
   private Selector selector;
   private ServerSocketChannel ch;
-  private Object event;
 
-  boolean finished;
+  // FIXME: get rid of?
+  private Handler handler;
   
 
   public HttpServer(ServerSocketChannel ch) {
+    this.handler = new Handler();
     this.ch = ch;
     try {
       selector = Selector.open();
@@ -36,15 +36,69 @@ public abstract class HttpServer extends Thread {
     }
   }
   
-  public void postEvent(Object event) {
-    // FIXME: race condition
-    this.event = event;
-    if (selector != null) selector.wakeup();
+  abstract class Action {
+    public abstract Object run();
+  }
+  
+  private class ActionRunner implements Runnable {
+    private Action action;
+    private boolean finished; 
+    private Object actionResult;
+    
+    private void setAction(Action action) {
+      this.action = action;
+      this.finished = false;
+    }
+    
+    public void run() {
+      actionResult = action.run();
+      synchronized (this) {
+        finished = true;
+        notify();
+      }
+    }
+    
+    public synchronized Object waitResult() {
+      while (!finished) {
+        try {
+          wait();
+        } catch (InterruptedException e) {
+          actionResult = null;
+          return null;
+        }
+      }
+      return actionResult;
+    }
+  };
+  ActionRunner actionRunner = new ActionRunner();
+  
+  /**
+   * Invoke from network thread and execute action on main thread (synchronized).
+   * @param action to run on main thread
+   * @return object return by the action
+   */
+  public Object runAction(Action action) {
+    actionRunner.setAction(action);
+    handler.post(actionRunner);
+    return actionRunner.waitResult();
+  }
+
+  interface Update extends Runnable {}
+  
+  ArrayList<Update> pendingUpdates = new ArrayList<Update>();
+  
+  public void postUpdate(Update update) {
+    pendingUpdates.add(update);
+    selector.wakeup();
   }
   
   protected void setResponse(KeyboardHttpConnection con, ByteBuffer out) {
+    try {
     con.key.interestOps(SelectionKey.OP_WRITE);
     con.outputBuffer = out;
+    } catch (Exception e) {
+      Log.e("wifikeyboard", "setResponse failed for hang connection", e);
+    }
   }
   
   @Override
@@ -53,19 +107,26 @@ public abstract class HttpServer extends Thread {
     try {
       ch.configureBlocking(false);
       SelectionKey serverkey = ch.register(selector, SelectionKey.OP_ACCEPT);
+      final ArrayList<Update> newUpdates = new ArrayList<Update>();
+      Action checkUpdates = new Action() {
+        @Override
+        public Object run() {
+          for (Update u : pendingUpdates) {
+            newUpdates.add(u);
+          }
+          pendingUpdates.clear();
+          return null;
+        }
+      };
 
-      while (!isDone()) {
+      while (true) {
+        newUpdates.clear();
+        runAction(checkUpdates);
+        for (Update u : newUpdates) {
+          u.run();
+        }
 //        Debug.d("waiting for event");
         selector.select();
-        Object ev;
-        synchronized (this) {
-          if (isDone) break;
-          ev = event;
-          event = null;
-        }
-        if (ev != null) {
-          onEvent(ev);
-        }
 //        Debug.d("got an event");
         Set<SelectionKey> keys = selector.selectedKeys();
 
@@ -91,10 +152,10 @@ public abstract class HttpServer extends Thread {
               if (key.isReadable()) {
                 prevState = HttpConnection.ConnectionState.SELECTOR_WAIT_FOR_NEW_INPUT; 
 //                Debug.d("processing read event");
-                long start = System.currentTimeMillis();
+//                long start = System.currentTimeMillis();
                 newState = conn.newInput();
-                long end = System.currentTimeMillis();
-                Debug.d("delay = " + (end - start));
+//                long end = System.currentTimeMillis();
+//                Debug.d("delay = " + (end - start));
 
 //                int size = android.os.Debug.getThreadAllocSize();
 //                android.os.Debug.stopAllocCounting();
@@ -105,7 +166,7 @@ public abstract class HttpServer extends Thread {
                 prevState = HttpConnection.ConnectionState.SELECTOR_WAIT_FOR_OUTPUT_BUFFER; 
 //                Debug.d("processing write event");
                 newState = conn.newOutputBuffer();
-                Log.d("wifikeyboard", "finished write event");
+//                Log.d("wifikeyboard", "finished write event");
               } else {
                 continue;
               }
@@ -130,41 +191,39 @@ public abstract class HttpServer extends Thread {
         }
       }
         
-//      Debug.d("Server socket close");
-      selector.close();
-      ch.close();
     } catch (IOException e) {
       Debug.e("network loop terminated", e);
+    } catch (NetworkThreadStopException e) {
+      Debug.e("network thread stop requested", e);
     }
-    synchronized (this) {
-      finished = true;
-      notifyAll();
-    }
+    try {
+      selector.close();
+    } catch (Throwable t) {}
+    try {
+      ch.close();
+    } catch (Throwable t) {}
+    onExit();
   }
   
-  private final synchronized boolean isDone() {
-    return isDone;
+  class NetworkThreadStopException extends RuntimeException {
+    private static final long serialVersionUID = 1L;
+    public NetworkThreadStopException(String msg) {
+      super(msg);
+    }
   }
   
   public synchronized void finish() {
-    isDone = true;
-    selector.wakeup();
-    // FIXME: remove
-    // FIXME: deadlocks with the sendKey() and it is wrong to block event thread
-    // FIXME: on the other hand if removed the problem is when activity restarted
-    // Make service start stop managment asynchronose to activity
-    // or make this thread management more sophisticated
-    // Like wait for older thread to finish and only after that start new one.
-    // That's require separate thread and http server object
-    while (!finished) {
-      try {
-        wait();
-      } catch (InterruptedException e) {
-        break;
+    postUpdate(new Update() {
+      @Override
+      public void run() {
+        throw new NetworkThreadStopException("network thread stop requested");
       }
-    }
+    });
   }
   
   public abstract HttpConnection newConnection(SocketChannel ch);
-  protected abstract void onEvent(Object ev);
+  /**
+   * Called on the end of network thread.
+   */
+  protected abstract void onExit();
 }

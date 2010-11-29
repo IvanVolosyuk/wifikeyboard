@@ -7,5 +7,6 @@ interface RemoteKeyboard {
     void registerKeyListener(RemoteKeyListener listener);
     void unregisterKeyListener(RemoteKeyListener listener);
     int getPort();
-    void notifyClient();
+    void startTextEdit(String content);
+    void stopTextEdit();
 }

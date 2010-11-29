@@ -13,11 +13,8 @@ import android.util.Log;
 
 public final class KeyboardHttpServer extends HttpServer {
   private HttpService service;
-  private Handler handler;
   static final int FOCUS = 1024;
   private int seqNum = 0;
-  private boolean connected;
-  private boolean delivered;
   ArrayList<KeyboardHttpConnection> waitingConnections =
     new ArrayList<KeyboardHttpConnection>();
   
@@ -28,22 +25,6 @@ public final class KeyboardHttpServer extends HttpServer {
   KeyboardHttpServer(HttpService service, ServerSocketChannel ch) {
     super(ch);
     this.service = service;
-    this.handler = new Handler();
-  }
-  
-  public synchronized void notifyClient() {
-    postEvent("my event");
-  }
-  
-  public void onEvent(Object o) {
-    String event = (String)o;
-    for (KeyboardHttpConnection con : waitingConnections) {
-//      Debug.d(event);
-      byte[] content = event.getBytes();
-      ByteBuffer out = con.sendData("text/plain", content, content.length);
-      setResponse(con, out);
-    }
-    waitingConnections.clear();
   }
   
   public String getPage() {
@@ -86,71 +67,112 @@ public final class KeyboardHttpServer extends HttpServer {
     }
   }
   
+  // used by network thread
+  abstract class KeyboardAction extends Action {
+    @Override
+    public Object run() {
+      try {
+        RemoteKeyListener listener = service.listener;
+        if (listener != null) {
+          return runAction(listener);
+        }
+      } catch (RemoteException e) {
+        Debug.e("Exception on input method side, ignore", e);
+      }
+      return null;
+    }
+    abstract Object runAction(RemoteKeyListener listener) throws RemoteException;
+  };
+  
+  // executed by network thread
   boolean sendKey(final int code0, final boolean pressed) {
-    delivered = false;
     final int code = convertKey(code0);
 //    Log.d("wifikeyboard", "in: " + code0 + " out:" + code);
-    handler.post(new Runnable() {
+    
+    Object success = runAction(new KeyboardAction() {
       @Override
-      public void run() {
-        boolean connected0 = false;
-        try {
-          // Debug.d("key going to listener");
-          if (service.listener != null) {
-            service.listener.keyEvent(code, pressed);
-            connected0 = true;
-          }
-        } catch (RemoteException e) {
-          Debug.e("Exception on input method side, ignore", e);
-        }
-        notifyDelivered(connected0);
+      Object runAction(RemoteKeyListener listener) throws RemoteException {
+        listener.keyEvent(code, pressed);
+        return service; // not null for success
       }
     });
-    return waitNotifyDelivered();
+    return success != null;
   }
     
+  // executed by network thread
   boolean sendChar(final int code) {
-    delivered = false;
-    handler.post(new Runnable() {
+    Object success = runAction(new KeyboardAction() {
       @Override
-      public void run() {
-        boolean connected0 = false;
-        try {
-          // Debug.d("key going to listener");
-          if (service.listener != null) {
-            service.listener.charEvent(code);
-            connected0 = true;
-          }
-        } catch (RemoteException e) {
-          Debug.e("Exception on input method side, ignore", e);
-        }
-        notifyDelivered(connected0);
+      public Object runAction(RemoteKeyListener listener) throws RemoteException {
+        listener.charEvent(code);
+        return service; // not null
       }
     });
-    return waitNotifyDelivered();
+    return success != null;
   }
   
-  protected synchronized void notifyDelivered(boolean connected0) {
-    connected = connected0;
-    delivered = true;
-    notifyAll();
-  }
-  private synchronized boolean waitNotifyDelivered() {
-    while (!delivered) {
-      try {
-        wait();
-      } catch (InterruptedException e) {
-        connected = false;
-      }
-    }
-    return connected;
-  }
-
   public HttpService getService() {
     return service;
   }
   
-  public void onInterrupt() {
-    
+  // executed by network thread
+  public void addWaitingConnection(
+      final KeyboardHttpConnection keyboardHttpConnection) {
+    runAction(new Action() {
+      @Override
+      public Object run() {
+        waitingConnections.add(keyboardHttpConnection);
+        Log.d("wifikeyboard", "add waiting connection");
+        return null;
+      }
+      
+    });
+  }
+  
+  public void onExit() {
+    runAction(new Action() {
+      @Override
+      public Object run() {
+        service.networkServerFinished();
+        return null;
+      }
+    });
+  }
+  
+  // executed by main thread
+  public void notifyClient(final String text) {
+    postUpdate(new Update() {
+      @Override
+      public void run() {
+        for (KeyboardHttpConnection con : waitingConnections) {
+          //            Debug.d(event);
+          byte[] content = text.getBytes();
+          ByteBuffer out = con.sendData("text/plain", content, content.length);
+          setResponse(con, out);
+        }
+        waitingConnections.clear();
+      }
+    });
+  }
+
+  // Executed by network thread
+  public boolean replaceText(final String string) {
+    Object result = runAction(new KeyboardAction() {
+      @Override
+      Object runAction(RemoteKeyListener listener) throws RemoteException {
+        
+        return listener.setText(string) ? service : null;
+      }
+    });
+    return result != null;
+  }
+  
+  public Object getText() {
+    return runAction(new KeyboardAction() {
+      @Override
+      Object runAction(RemoteKeyListener listener) throws RemoteException {
+        return listener.getText();
+      }
+    });
   }
 }

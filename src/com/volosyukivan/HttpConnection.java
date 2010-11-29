@@ -381,8 +381,8 @@ public abstract class HttpConnection {
   public abstract RequestHandler lookupRequestHandler();
   
   // FIXME: dummy form data implementation
-  private byte[] formData = new byte[BUFSIZE];
-  private int formDataLength = 0;
+  byte[] formData = new byte[BUFSIZE];
+  int formDataLength = 0;
   private int formDataExpectedLength = 0;
 
   private HttpConnectionState readFormData() {
@@ -402,7 +402,7 @@ public abstract class HttpConnection {
         // request end
         this.formDataLength = formDataLength;
         this.offset = i + 1;
-        Log.d("wifikeyboard", "Form data: " + new String(formData, 0, formDataLength));
+//        Log.d("wifikeyboard", "Form data: " + new String(formData, 0, formDataLength));
         return HttpConnectionState.EXECUTE_REQUEST;
       } else {
       }
@@ -422,18 +422,18 @@ public abstract class HttpConnection {
     }
     
     byte[] contentType = header[0]; 
-    if (ACCEPTED_CONTENT_TYPE.length != headerLen[0]) {
-      throw new ConnectionFailureException("unsupported content type");
-    }
-    int len = ACCEPTED_CONTENT_TYPE.length;
-    for (int i = 0; i < len; i++) {
-      if (ACCEPTED_CONTENT_TYPE[i] != contentType[i])
-        throw new ConnectionFailureException("unsupported content type");
-    }
+//    if (ACCEPTED_CONTENT_TYPE.length != headerLen[0]) {
+//      throw new ConnectionFailureException("unsupported content type");
+//    }
+//    int len = ACCEPTED_CONTENT_TYPE.length;
+//    for (int i = 0; i < len; i++) {
+//      if (ACCEPTED_CONTENT_TYPE[i] != contentType[i])
+//        throw new ConnectionFailureException("unsupported content type");
+//    }
     
     int contentLen = 0;
-    len = headerLen[1];
-    byte[] contentLenHeader = header[1];
+    int len = headerLen[0] - 1;
+    byte[] contentLenHeader = header[0];
     for (int i = 0; i < len; i++) {
       contentLen = (contentLen * 10) + contentLenHeader[i] - LETTER_ZERO;
     }
@@ -442,6 +442,9 @@ public abstract class HttpConnection {
     
     if (contentLen == 0) {
       return HttpConnectionState.EXECUTE_REQUEST;
+    }
+    if (formData.length < contentLen) {
+      formData = new byte[contentLen];
     }
     return HttpConnectionState.READ_FORM_DATA;
   }
@@ -452,6 +455,7 @@ public abstract class HttpConnection {
 //    ByteBuffer output = processRequest(req);
     // Cleanup
     requestLength = 0;
+    formDataLength = 0;
     
     if (output == null) {
       return ConnectionState.SELECTOR_NO_WAIT;
