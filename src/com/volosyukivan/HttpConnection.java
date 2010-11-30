@@ -37,6 +37,7 @@ public abstract class HttpConnection {
   
   public HttpConnection(SocketChannel ch) {
     this.ch = ch;
+    Log.d("wifikeyboard", "new connection");
   }
 
   public SocketChannel getClient() {

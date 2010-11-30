@@ -15,8 +15,8 @@ public final class KeyboardHttpConnection extends HttpConnection {
 
   private KeyboardHttpServer server;
   
-    private byte[][] patterns;
-    RequestHandler[] handlers;
+    private static byte[][] patterns;
+    private static RequestHandler[] handlers;
 
   public KeyboardHttpConnection(final KeyboardHttpServer server, SocketChannel ch) {
     super(ch);
@@ -32,6 +32,10 @@ public final class KeyboardHttpConnection extends HttpConnection {
         handlers.add(handler);
       }
     };
+    
+    if (patterns != null) return;
+    
+    // Initialize mappings
     HandlerInit handler = new HandlerInit();
 
     handler.add("key", new RequestHandler(null) {
@@ -39,7 +43,7 @@ public final class KeyboardHttpConnection extends HttpConnection {
       public ByteBuffer processQuery() {
         String response = server.processKeyRequest(
             new String(request, cmdEnd + 1, queryEnd));
-        
+        Log.d("wifikeyboard", "response = " + response);
         Map<String, ByteBuffer> cache = responseCache.get();
         if (cache == null) {
           cache = new TreeMap<String, ByteBuffer>();
@@ -97,7 +101,6 @@ public final class KeyboardHttpConnection extends HttpConnection {
         return sendData("text/plain; charset=UTF-8", text, text.length);
       }
     });
-
     
     handler.add("bg.gif", new RequestHandler(null) {
       @Override
@@ -144,6 +147,8 @@ public final class KeyboardHttpConnection extends HttpConnection {
   @Override
   public RequestHandler lookupRequestHandler() {
     byte[] request = this.request;
+    
+    Log.d("wifikeyboard", "req: " + new String(request, 0, requestLength));
     
     queryEnd = 0;
     for (int i = requestLength - 1; i >= 0; i--) {

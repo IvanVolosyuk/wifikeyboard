@@ -30,7 +30,6 @@
     seqConfirmed = 12345;
     seqPressed = seqConfirmed;
     events=Object();
-    times=Object();
     num_inflight = 0;
     num_delayed = 0;
     latency = 0;
@@ -46,12 +45,10 @@
     function onConfirm(newConfirmed) {
       if (newConfirmed == seqPressed) {
         events=Object();
-	times=Object();
       }
       if (newConfirmed <= seqConfirmed) return;
       for (i = seqConfirmed; i < newConfirmed; i++) {
         events[i] = undefined;
-	times[i] = undefined;
 	seqConfirmed = newConfirmed;
       }
       network();
@@ -60,7 +57,6 @@
     function queue(code, mode) {
       ev = mode + code;
       events[seqPressed] = ev;
-      times[seqPressed] = new Date().getTime();
       seqPressed += 1
 //      var el = document.getElementById("keys");
 //      el.innerHTML = el.innerHTML + ' send:' + mode + code + " ";
@@ -94,14 +90,15 @@
 
     function makeXhr() {
       var xhr = new XMLHttpRequest();
-      xhr.newConfirmed = newConfirmed;
-      xhr.reqTime = times[seqConfirmed];
+      var sentNewConfirmed = newConfirmed;
+      var aborted = false;
+      var finished = false;
       num_inflight += 1;
       xhr.onreadystatechange = function() {
-	if (xhr.aborted) return;
+	if (aborted) return;
 	if (xhr.readyState != 4) return;
 	num_inflight -= 1;
-	xhr.finished = true;
+	finished = true;
 
         if (xhr.status != 200) {
 	  setDisplayState("failure")
@@ -116,46 +113,19 @@
         } else if (xhr.responseText == "multi") {
 	  setDisplayState("multi");
         } else {
-	  // currTime = new Date().getTime();
-	  // delay = currTime - this.reqTime;
-          // 
-	  // if (currTime > latencyTime2 + 5000) {
-	  //   latency2 = 0;
-	  //   latencyTime2 = 0;
-	  // }
-	  // if (currTime > latencyTime + 5000) {
-	  //   latency = latency2;
-	  //   latencyTime = latencyTime2;
-	  //   latency2 = 0;
-	  //   latencyTime2 = 0;
-	  // }
-          //
-	  // if (currTime > latencyTime + 2500) {
-	  //   if (delay > latency2) {
-	  //     latency2 = delay;
-	  //     latencyTime2 = currTime;
-	  //   }
-	  // }
-	  // if (delay > latency) {
-	  //   latencyTime = currTime;
-	  //   latency = delay;
-	  // }
-	  // text = "You can type now. <br>Latency is %d ms";
-          // comment.innerHTML = text.replace("%d", latency);
 	  setDisplayState("connected");
         }
-	onConfirm(self.newConfirmed);
-	network();
+	onConfirm(sentNewConfirmed);
       }
       setTimeout(function() {
-        if (xhr.finished) return;
-	xhr.aborted = true;
+        if (finished) return;
+	aborted = true;
 	xhr.abort();
 	num_inflight -= 1;
 	setDisplayState("failure");
 	makeXhr();
       }, 3000);
-      xhr.open('GET', "/key?" + newConfirmed + "," + data, true);
+      xhr.open('GET', "/key?" + sentNewConfirmed + "," + data, true);
       xhr.send(null);
       return xhr;
     }
@@ -292,26 +262,26 @@
 
       if (stat == null) {
         stat = document.getElementById("status");
-        comment = document.getElementById("comment");
+        xcomment = document.getElementById("comment");
       }
       if (stat == null) return;
 
       if (newState == "connected") {
         stat.innerHTML = "Connected";
         stat["color"] = "green";
-        comment.innerHTML = "You can type now.";
+        xcomment.innerHTML = "You can type now.";
       } else if (newState == "failure") {
         stat.innerHTML = "Connection problem";
         stat["color"] = "red";
-        comment.innerHTML = "No connection between the phone and computer.";
+        xcomment.innerHTML = "No connection between the phone and computer.";
       } else if (newState == "problem") {
         stat.innerHTML = "Not typing";
         stat["color"] = "red";
-        comment.innerHTML = 'Enable WiFiKeyboard input on you device. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings">Visit help page.</a>';
+        xcomment.innerHTML = 'Enable WiFiKeyboard input on you device. <a href="http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings">Visit help page.</a>';
       } else if (newState == "multi") {
         stat.innerHTML = "Mutiple input";
         stat["color"] = "red";
-        comment.innerHTML = "Typing from multiple browser windows is not supported. Use one browser window.";
+        xcomment.innerHTML = "Typing from multiple browser windows is not supported. Use one browser window.";
       }
     }
 

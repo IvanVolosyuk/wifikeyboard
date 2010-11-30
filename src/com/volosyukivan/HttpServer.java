@@ -89,7 +89,9 @@ public abstract class HttpServer extends Thread {
   
   public void postUpdate(Update update) {
     pendingUpdates.add(update);
+    try {
     selector.wakeup();
+    } catch (Throwable t) {}
   }
   
   protected void setResponse(KeyboardHttpConnection con, ByteBuffer out) {

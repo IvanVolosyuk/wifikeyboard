@@ -24,6 +24,7 @@ import android.util.Log;
 
 public class HttpService extends Service {
   RemoteKeyListener listener;
+  PortUpdateListener portUpdateListener;
   String htmlpage;
   int port;
   static KeyboardHttpServer server;
@@ -60,10 +61,6 @@ public class HttpService extends Service {
     }
 
     @Override
-    public int getPort() throws RemoteException {
-      return port;
-    }
-    @Override
     public void startTextEdit(String content) throws RemoteException {
       // FIXME: add args
       if (server != null)
@@ -75,6 +72,15 @@ public class HttpService extends Service {
       // FIXME: add args
       if (server != null)
         server.notifyClient(null);
+    }
+    @Override
+    public void setPortUpdateListener(PortUpdateListener listener)
+        throws RemoteException {
+      HttpService.this.portUpdateListener = listener;
+      if (port != 0) {
+        portUpdateListener.portUpdated(port);
+      }
+      
     }
   };
   
@@ -196,6 +202,12 @@ public class HttpService extends Service {
     startServer(this);
   }
   
+  private static void removeNotification(Context context) {
+    NotificationManager mgr =
+      (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+    mgr.cancelAll();
+  }
+  
   @Override
   public void onDestroy() {
     isRunning = false;
@@ -206,10 +218,7 @@ public class HttpService extends Service {
     unregisterReceiver(mWifiStateReceiver);
     TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
     tm.listen(dataListener, PhoneStateListener.LISTEN_NONE);
-    NotificationManager mgr =
-      (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-    mgr.cancelAll();
-
+    removeNotification(this);
     super.onDestroy();
   }
 
@@ -227,6 +236,13 @@ public class HttpService extends Service {
     Editor editor = context.getSharedPreferences("port", MODE_PRIVATE).edit();
     editor.putInt("port", context.port);
     editor.commit();
+    try {
+      if (context.portUpdateListener != null) {
+        context.portUpdateListener.portUpdated(context.port);
+      }
+    } catch (RemoteException e) {
+      Log.e("wifikeyboard", "port update failure", e);
+    }
     context.updateNotification(true);
     server.start();
   }

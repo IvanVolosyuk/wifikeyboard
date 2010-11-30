@@ -1,10 +1,14 @@
 package com.volosyukivan;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.nio.channels.ServerSocketChannel;
 import java.util.ArrayList;
 import java.util.Enumeration;
+
+import com.volosyukivan.PortUpdateListener.Stub;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -82,16 +86,36 @@ public class WiFiKeyboard extends Activity {
     @Override
     public void onResume() {
         super.onResume();
+        
+//        // FIXME: block default port out of use
+//        ServerSocketChannel ch;
+//        try {
+//          ch = ServerSocketChannel.open();
+//          ch.socket().setReuseAddress(true);
+//          ch.socket().bind(new java.net.InetSocketAddress(7777));
+//          ch = ServerSocketChannel.open();
+//          ch.socket().setReuseAddress(true);
+//          ch.socket().bind(new java.net.InetSocketAddress(1111));
+//        } catch (IOException e1) {
+//          // TODO Auto-generated catch block
+//          e1.printStackTrace();
+//        }
+        
         serviceConnection = new ServiceConnection() {
           //@Override
           public void onServiceConnected(ComponentName name, IBinder service) {
             Debug.d("WiFiInputMethod connected to HttpService.");
             try {
-              int newPort = RemoteKeyboard.Stub.asInterface(service).getPort();
-              if (newPort != port) {
-                port = newPort;
-                setContentView(createView());
-              }
+              Stub listener = new PortUpdateListener.Stub() {
+                @Override
+                public void portUpdated(int newPort) throws RemoteException {
+                  if (newPort != port) {
+                    port = newPort;
+                    setContentView(createView());
+                  }
+                }
+              };
+              RemoteKeyboard.Stub.asInterface(service).setPortUpdateListener(listener);
             } catch (RemoteException e) {
               throw new RuntimeException(
                   "WiFiInputMethod failed to connected to HttpService.", e);
