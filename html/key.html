@@ -286,7 +286,7 @@
     }
 
     function submit_text() {
-        submitter = new XMLHttpRequest();
+        var submitter = new XMLHttpRequest();
         submitter.onreadystatechange = function() {
   	  if (submitter.readyState != 4) return;
             if (submitter.status != 200 || submitter.responseText != "ok") {
@@ -297,7 +297,7 @@
             direct_input();
   	  }
         }
-        params = document.getElementById("in").value;
+        var params = document.getElementById("in").value;
         submitter.open('POST', "/form", true);
         submitter.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         submitter.setRequestHeader("Content-length", params.length);
@@ -351,7 +351,7 @@
     }
 
     function recv_text() {
-        recvText = new XMLHttpRequest();
+        var recvText = new XMLHttpRequest();
         recvText.onreadystatechange = function() {
   	  if (recvText.readyState != 4) return;
             if (recvText.status != 200) {
@@ -363,7 +363,6 @@
               local_input();
   	  }
         }
-        params = document.getElementById("in").value;
         recvText.open('GET', "/text", true);
         recvText.send(null);
     }

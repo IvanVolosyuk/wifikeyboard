@@ -159,7 +159,7 @@ public final class KeyboardHttpConnection extends HttpConnection {
     }
     
     int cmdStart = 0;
-    for (int i = queryEnd; i >= 0; i--) {
+    for (int i = queryEnd - 1; i >= 0; i--) {
       if (request[i] == LETTER_SLASH) {
         cmdStart = i + 1;
         break;

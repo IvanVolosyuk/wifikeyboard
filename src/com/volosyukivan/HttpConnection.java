@@ -139,12 +139,12 @@ public abstract class HttpConnection {
           httpConnectionState = HttpConnectionState.READ_REQUEST;
           in.position(offset);
           connectionState = executeRequest();
-          if (connectionState != ConnectionState.SELECTOR_WAIT_FOR_NEW_INPUT) break;
+          if (connectionState != ConnectionState.SELECTOR_WAIT_FOR_NEW_INPUT) break exit;
       }
       
     }
     in.position(offset);
-    return ConnectionState.SELECTOR_WAIT_FOR_NEW_INPUT;
+    return connectionState;
   }
   
   private static final byte LETTER_P = "P".getBytes()[0];
