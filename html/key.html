@@ -11,6 +11,19 @@
   <title>WiFi Keyboard</title>
   <script language="JavaScript">
 
+   WebFontConfig = {
+     google: { families: [ 'Tangerine', 'Cantarell' ] }
+   };
+   (function() {
+     var wf = document.createElement('script');
+     wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+         '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+     wf.type = 'text/javascript';
+     wf.async = 'true';
+     var s = document.getElementsByTagName('script')[0];
+     s.parentNode.insertBefore(wf, s);
+   })();
+
    if (typeof XMLHttpRequest == "undefined")
      XMLHttpRequest = function () {
        try { return new ActiveXObject("Msxml2.XMLHTTP.6.0"); }
@@ -372,31 +385,32 @@
       focus_me();
       send(1024, 'D');
       direct_input();
+      WebFont.load({
+          google: {
+            families: [ 'Cantal', 'Yanone Kaffeesatz', 'Droid Sans' ]
+      }});
     }
     window.onload = loadFinished;
 </script>
-<link href='http://fonts.googleapis.com/css?family=Cantal' rel='stylesheet' type='text/css'>
-<link href=' http://fonts.googleapis.com/css?family=Yanone+Kaffeesatz' rel='stylesheet' type='text/css'>
-<link href=' http://fonts.googleapis.com/css?family=Droid+Sans' rel='stylesheet' type='text/css'>
 <link rel="icon" type="image/png" href="/icon.png" />
 <style type="text/css">
    h1 {
     font-family: 'Cantal', arial, serif;
-    font-size: 300%;
+    font-size: 30px;
    } 
    h2 {
     font-family: 'Yanone Kaffeesatz', arial, serif; 
-    font-size: 130%;
+    font-size: 20px;
    }
    div {
     font-family: 'Droid Sans', arial, serif;
-    font-size: 110%;
-    padding: 3pt;
+    font-size: 15px;
+    padding: 3px;
    }
 
    div.footer {
     font-family: arial, serif;
-    font-size: 100%;
+    font-size: 20px;
     text-align: right;
    }
    body {
@@ -434,7 +448,7 @@
 
 <!-- Main Window End -->
 </td>
-<td width="50%">
+<td width="450">
   <table border="0"><tbody><tr><td cellspacing="50" cellpadding="50">
   <tr>
   <td>
@@ -452,7 +466,7 @@
   </ul>
   </td></tr></tbody></table>
 </td>
-<td align="right">
+<td align="right" width="200">
 <!-- Side bar -->
   <table border="1" cellpadding="20"><tbody><tr><td cellspacing="50" cellpadding="50">
   <h2>Status: <font color="black" id="status">Connecting...</font></h2>
@@ -481,6 +495,5 @@
 </tr>
 </tbody>
 </table>
-
 </body>
 </html>

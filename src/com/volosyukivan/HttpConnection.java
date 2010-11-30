@@ -108,8 +108,7 @@ public abstract class HttpConnection {
           break;
         case LOOK_REQUEST_HEADERS:
           isPost = request[0] == LETTER_P;
-          requestHandler = lookupRequestHandler();
-          headerMatcher = requestHandler.headerMatcher;
+          headerMatcher = lookupRequestHandler();
           if (headerMatcher == null)
             httpConnectionState = HttpConnectionState.SKIP_HEADERS;
           else {
@@ -370,7 +369,6 @@ public abstract class HttpConnection {
   }
   
   
-  private RequestHandler requestHandler;
   
 //  = new RequestHandler(new HeaderMatcher("Accept-Language","Accept-Encoding")) {
 //    @Override
@@ -379,7 +377,7 @@ public abstract class HttpConnection {
 //    }
 //  };
   
-  public abstract RequestHandler lookupRequestHandler();
+  public abstract HeaderMatcher lookupRequestHandler();
   
   // FIXME: dummy form data implementation
   byte[] formData = new byte[BUFSIZE];
@@ -450,10 +448,10 @@ public abstract class HttpConnection {
     return HttpConnectionState.READ_FORM_DATA;
   }
   
+  protected abstract ByteBuffer requestHandler();
+  
   private ConnectionState executeRequest() throws IOException {
-    ByteBuffer output = requestHandler.processQuery();
-//    String req = parseRequest(new String(request, 0, requestLength));
-//    ByteBuffer output = processRequest(req);
+    ByteBuffer output = requestHandler();
     // Cleanup
     requestLength = 0;
     formDataLength = 0;
@@ -498,15 +496,6 @@ public abstract class HttpConnection {
     }
   };
   
-  abstract static class RequestHandler {
-    public final HeaderMatcher headerMatcher;
-    
-    public RequestHandler(HeaderMatcher headerMatcher) {
-      this.headerMatcher = headerMatcher;
-    }
-    public abstract ByteBuffer processQuery();
-  };
-
 //  @Deprecated
 //  private String parseRequest(String line) {
 //    String[] parts = line.split(" ");

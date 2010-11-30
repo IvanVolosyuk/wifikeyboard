@@ -15,127 +15,41 @@ public final class KeyboardHttpConnection extends HttpConnection {
 
   private KeyboardHttpServer server;
   
-    private static byte[][] patterns;
-    private static RequestHandler[] handlers;
-
+  private static final byte[] Q_KEY = "key".getBytes();
+  private static final byte[] Q_FORM = "form".getBytes();
+  private static final byte[] Q_TEXT = "text".getBytes();
+  private static final byte[] Q_WAIT = "wait".getBytes();
+  private static final byte[] Q_DEFAULT = "".getBytes();
+  private static final byte[] Q_BG_GIF = "bg.gif".getBytes();
+  private static final byte[] Q_ICON_PNG = "icon.png".getBytes();
+  
+  private static final byte[][] patterns = {
+    Q_KEY,
+    Q_FORM,
+    Q_TEXT,
+    Q_WAIT,
+    Q_DEFAULT,
+    Q_BG_GIF,
+    Q_ICON_PNG,
+  };
+  
+  private static final int H_KEY = 0;
+  private static final int H_FORM = 1;
+  private static final int H_TEXT = 2;
+  private static final int H_WAIT = 3;
+  private static final int H_DEFAULT = 4;
+  private static final int H_BG_GIF = 5;
+  private static final int H_ICON_PNG = 6;
+  
+  private int requestType;
+  
+  private HeaderMatcher formHeaders = new HeaderMatcher(
+      "Content-Type", "Content-Length"
+  );
+  
   public KeyboardHttpConnection(final KeyboardHttpServer server, SocketChannel ch) {
     super(ch);
     this.server = server;
-    // This initalization should be done only once, but it references 'server',
-    // too bad, need to look at this
-    class HandlerInit {
-      ArrayList<byte[]> patterns = new ArrayList<byte[]>();
-      ArrayList<RequestHandler> handlers = new ArrayList<RequestHandler>();
-      
-      public void add(String pattern, RequestHandler handler) {
-        patterns.add(pattern.getBytes());
-        handlers.add(handler);
-      }
-    };
-    
-    if (patterns != null) return;
-    
-    // Initialize mappings
-    HandlerInit handler = new HandlerInit();
-
-    handler.add("key", new RequestHandler(null) {
-      @Override
-      public ByteBuffer processQuery() {
-        String response = server.processKeyRequest(
-            new String(request, cmdEnd + 1, queryEnd));
-        Log.d("wifikeyboard", "response = " + response);
-        Map<String, ByteBuffer> cache = responseCache.get();
-        if (cache == null) {
-          cache = new TreeMap<String, ByteBuffer>();
-          responseCache.set(cache);
-        }
-        
-        ByteBuffer buffer = cache.get(response);
-        if (buffer != null) {
-          buffer.position(0);
-          return buffer;
-        }
-//        Debug.d(response);
-        byte[] content = response.getBytes();
-        buffer = sendData("text/plain", content, content.length);
-        cache.put(response, buffer);
-        return buffer;
-      }
-    });
-    
-    // Default page
-    handler.add("", new RequestHandler(null) {
-      @Override
-      public ByteBuffer processQuery() {
-        String page = server.getPage();
-        try {
-          byte[] content = page.getBytes("UTF-8");
-          server.sendKey(KeyboardHttpServer.FOCUS, true);
-          return sendData("text/html; charset=UTF-8", content, content.length);
-        } catch (UnsupportedEncodingException e) {
-          throw new RuntimeException("UTF-8 unsupported");
-        }
-      }
-    });
-    
-    handler.add("wait", new RequestHandler(null) {
-      @Override
-      public ByteBuffer processQuery() {
-        server.addWaitingConnection(KeyboardHttpConnection.this);
-        return null;
-      }
-    });
-    
-    handler.add("text", new RequestHandler(null) {
-      @Override
-      public ByteBuffer processQuery() {
-        byte[] text = null;
-        try {
-          text = ((String)(server.getText())).getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-        }
-        if (text == null) {
-          // FIXME: error handling?
-          text = new byte[0];
-        }
-        return sendData("text/plain; charset=UTF-8", text, text.length);
-      }
-    });
-    
-    handler.add("bg.gif", new RequestHandler(null) {
-      @Override
-      public ByteBuffer processQuery() {
-        return sendImage(R.raw.bg);
-      }
-    });
-    
-    handler.add("icon.png", new RequestHandler(null) {
-      @Override
-      public ByteBuffer processQuery() {
-        return sendImage(R.raw.icon);
-      }
-    });
-    
-    handler.add("form", new RequestHandler(new HeaderMatcher(
-        "Content-Type", "Content-Length"
-    )) {
-      @Override
-      public ByteBuffer processQuery() {
-        String newText = "";
-        try {
-          newText = new String(formData, 0, formDataLength, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-          Log.e("wifikeyboard", "UTF-8", e);
-        }
-        boolean success = server.replaceText(newText);
-        // FIXME: use cached value
-        byte[] resp = (success ? "ok" : "fail").getBytes();
-        return sendData("text/plain", resp, resp.length);
-      }
-    });
-    
-    this.handlers = handler.handlers.toArray(new RequestHandler[0]);
-    this.patterns = handler.patterns.toArray(new byte[0][0]);
   }
   
   private static final byte LETTER_SPACE = " ".getBytes()[0];
@@ -145,10 +59,10 @@ public final class KeyboardHttpConnection extends HttpConnection {
   private int cmdEnd;
   
   @Override
-  public RequestHandler lookupRequestHandler() {
+  public HeaderMatcher lookupRequestHandler() {
     byte[] request = this.request;
     
-    Log.d("wifikeyboard", "req: " + new String(request, 0, requestLength));
+//    Log.d("wifikeyboard", "req: " + new String(request, 0, requestLength));
     
     queryEnd = 0;
     for (int i = requestLength - 1; i >= 0; i--) {
@@ -174,7 +88,8 @@ public final class KeyboardHttpConnection extends HttpConnection {
       }
     }
     
-    int nhandlers = handlers.length;
+    requestType = H_DEFAULT;
+    int nhandlers = patterns.length;
     int cmdLen = cmdEnd - cmdStart;
     outer:
     for (int i = 0; i < nhandlers; i++) {
@@ -186,10 +101,13 @@ public final class KeyboardHttpConnection extends HttpConnection {
       for (int j = 0; j < cmdLen; j++) {
         if (pattern[j] != request[j + cmdStart]) continue outer; 
       }
-      return handlers[i];
+      requestType = i;
     }
     
-    return handlers[0];
+    switch (requestType) {
+    case H_FORM: return formHeaders;
+    default: return null;
+    }
   }
  
   public ByteBuffer sendData(
@@ -220,4 +138,90 @@ public final class KeyboardHttpConnection extends HttpConnection {
   
   private static ThreadLocal<Map<String,ByteBuffer>> responseCache =
     new ThreadLocal<Map<String,ByteBuffer>>();
+
+  @Override
+  protected ByteBuffer requestHandler() {
+    switch (requestType) {
+    case H_KEY: return onKeyRequest();
+    case H_TEXT: return onTextRequest();
+    case H_FORM: return onFormRequest();
+    case H_DEFAULT: return onDefaultRequest();
+    case H_BG_GIF: return onBgGifRequest();
+    case H_ICON_PNG: return onIconPngRequest();
+    case H_WAIT: return onWaitRequest();
+    default: return onDefaultRequest();
+    }
+  }
+
+  private ByteBuffer onWaitRequest() {
+    server.addWaitingConnection(KeyboardHttpConnection.this);
+    return null;
+  }
+
+  private ByteBuffer onIconPngRequest() {
+    return sendImage(R.raw.icon);
+  }
+
+  private ByteBuffer onBgGifRequest() {
+    return sendImage(R.raw.bg);
+  }
+
+  private ByteBuffer onDefaultRequest() {
+    String page = server.getPage();
+    try {
+      byte[] content = page.getBytes("UTF-8");
+      server.sendKey(KeyboardHttpServer.FOCUS, true);
+      return sendData("text/html; charset=UTF-8", content, content.length);
+    } catch (UnsupportedEncodingException e) {
+      throw new RuntimeException("UTF-8 unsupported");
+    }
+  }
+
+  private ByteBuffer onFormRequest() {
+    String newText = "";
+    try {
+      newText = new String(formData, 0, formDataLength, "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      Log.e("wifikeyboard", "UTF-8", e);
+    }
+    boolean success = server.replaceText(newText);
+    // FIXME: use cached value
+    byte[] resp = (success ? "ok" : "fail").getBytes();
+    return sendData("text/plain", resp, resp.length);
+  }
+
+  private ByteBuffer onTextRequest() {
+    byte[] text = null;
+    try {
+      text = ((String)(server.getText())).getBytes("UTF-8");
+    } catch (UnsupportedEncodingException e) {
+    }
+    if (text == null) {
+      // FIXME: error handling?
+      text = new byte[0];
+    }
+    return sendData("text/plain; charset=UTF-8", text, text.length);
+  }
+
+  private ByteBuffer onKeyRequest() {
+    String response = server.processKeyRequest(
+        new String(request, cmdEnd + 1, queryEnd));
+//    Log.d("wifikeyboard", "response = " + response);
+    Map<String, ByteBuffer> cache = responseCache.get();
+    if (cache == null) {
+      cache = new TreeMap<String, ByteBuffer>();
+      responseCache.set(cache);
+    }
+    
+    ByteBuffer buffer = cache.get(response);
+    if (buffer != null) {
+      buffer.position(0);
+      return buffer;
+    }
+//    Debug.d(response);
+    byte[] content = response.getBytes();
+    buffer = sendData("text/plain", content, content.length);
+    cache.put(response, buffer);
+    return buffer;
+  }
 }
