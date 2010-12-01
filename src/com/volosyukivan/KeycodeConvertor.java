@@ -54,7 +54,6 @@ public final class KeycodeConvertor {
       // ESC
       case 27: return KeyEvent.KEYCODE_BACK;
       // Home
-      case 36: return KeyEvent.KEYCODE_HOME;
       case 113: return KeyEvent.KEYCODE_MENU;
       
       case 114: return KeyEvent.KEYCODE_SEARCH;
@@ -65,8 +64,12 @@ public final class KeycodeConvertor {
       case 121: return KeyEvent.KEYCODE_VOLUME_UP;
       case 120: return KeyEvent.KEYCODE_VOLUME_DOWN;
       case KeyboardHttpServer.FOCUS: return KeyboardHttpServer.FOCUS;
+      case 36: return WiFiInputMethod.KEY_HOME;
+      case 35: return WiFiInputMethod.KEY_END;
+      case 17: return WiFiInputMethod.KEY_CONTROL;
+      case 46: return WiFiInputMethod.KEY_DEL;
 
-      default: return KeyEvent.KEYCODE_UNKNOWN;
+      default: return -1;
     }
 
     // case x: return KeyEvent.KEYCODE_SOFT_LEFT;

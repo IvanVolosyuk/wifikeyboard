@@ -18,6 +18,11 @@ import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 
 public class WiFiInputMethod extends InputMethodService {
+  public static final int KEY_HOME = -1000;
+  public static final int KEY_END = -1001;
+  public static final int KEY_CONTROL = -1002;
+  public static final int KEY_DEL = -1003;
+
   @Override
   public void onStartInput(EditorInfo attribute, boolean restarting) {
     super.onStartInput(attribute, restarting);
@@ -112,6 +117,17 @@ public class WiFiInputMethod extends InputMethodService {
 //      Debug.d("connection closed");
       return;
     }
+    
+    if (pressedKeys.contains(KEY_CONTROL)) {
+      switch (code) {
+      case 'a':case 'A': selectAll(conn); break;
+      case 'x':case 'X': cut(conn); break;
+      case 'c':case 'C': copy(conn); break;
+      case 'v':case 'V': paste(conn); break;
+      }
+      return;
+    }
+
     String text = null; 
     if (code >= 0 && code <= 65535) {
       text = new String(new char[] { (char) code } );
@@ -176,6 +192,28 @@ public class WiFiInputMethod extends InputMethodService {
 //      Debug.d("connection closed");
       return;
     }
+    if (code < 0) {
+      if (down == false) return;
+      switch (code) {
+      case KEY_HOME: keyHome(conn); break;
+      case KEY_END: keyEnd(conn); break;
+      case KEY_DEL: keyDel(conn); break;
+      }
+      return;
+    }
+    
+//    if (pressedKeys.contains(KEY_CONTROL)) {
+//      if (down == false) return;
+//      switch (code) {
+//      case KeyEvent.KEYCODE_A: selectAll(conn); break;
+//      case KeyEvent.KEYCODE_X: cut(conn); break;
+//      case KeyEvent.KEYCODE_C: copy(conn); break;
+//      case KeyEvent.KEYCODE_V: paste(conn); break;
+//      }
+//      return;
+//    }
+    
+    
     conn.sendKeyEvent(new KeyEvent(
         down ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP, code));
     if (resetModifiers) {
@@ -184,6 +222,63 @@ public class WiFiInputMethod extends InputMethodService {
     }
   }
   
+  private void keyDel(InputConnection conn) {
+    conn.deleteSurroundingText(0, 1);
+    conn.commitText("", 0);
+  }
+
+  private void paste(InputConnection conn) {
+    conn.performContextMenuAction(android.R.id.paste);
+  }
+
+  private void copy(InputConnection conn) {
+    conn.performContextMenuAction(android.R.id.copy);
+  }
+
+  private void cut(InputConnection conn) {
+    conn.performContextMenuAction(android.R.id.cut);
+  }
+
+  private void selectAll(InputConnection conn) {
+    conn.performContextMenuAction(android.R.id.selectAll);
+  }
+  
+  private void move(InputConnection conn, int num, boolean left) {
+    int code = left ? KeyEvent.KEYCODE_DPAD_LEFT : KeyEvent.KEYCODE_DPAD_RIGHT;
+    for (int i = 0; i < num; i++) {
+      conn.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, code));
+      conn.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, code));
+    }
+  }
+
+  private void keyEnd(InputConnection conn) {
+    boolean control = pressedKeys.contains(KEY_CONTROL);
+    String text = conn.getTextAfterCursor(100000, 0).toString();
+    int len;
+    if (control) {
+      len = text.length();
+    } else {
+      len = text.indexOf('\n');
+      if (len == -1) len = text.length();
+    }
+    move(conn, len, false);
+  }
+
+  private void keyHome(InputConnection conn) {
+    boolean control = pressedKeys.contains(KEY_CONTROL);
+    String text = conn.getTextBeforeCursor(100000, 0).toString();
+    int len;
+    if (control) {
+      len = text.length();
+    } else {
+      len = text.length() - text.lastIndexOf('\n') - 1;
+      if (len == -1) {
+        len = text.length();
+      }
+    }
+    move(conn, len, true);
+  }
+
   boolean setText(String text) {
     // FIXME: need feedback if the input was lost
     InputConnection conn = getCurrentInputConnection();

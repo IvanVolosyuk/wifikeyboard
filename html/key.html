@@ -10,20 +10,6 @@
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <title>WiFi Keyboard</title>
   <script language="JavaScript">
-
-   WebFontConfig = {
-     google: { families: [ 'Tangerine', 'Cantarell' ] }
-   };
-   (function() {
-     var wf = document.createElement('script');
-     wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
-         '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
-     wf.type = 'text/javascript';
-     wf.async = 'true';
-     var s = document.getElementsByTagName('script')[0];
-     s.parentNode.insertBefore(wf, s);
-   })();
-
    if (typeof XMLHttpRequest == "undefined")
      XMLHttpRequest = function () {
        try { return new ActiveXObject("Msxml2.XMLHTTP.6.0"); }
@@ -318,9 +304,10 @@
       }
 
     function direct_input() {
-        window.onkeydown = down;
-        window.onkeyup = up;
-        window.onkeypress = press;
+        var x = document.getElementById("in");
+        x.onkeydown = down;
+        x.onkeyup = up;
+        x.onkeypress = press;
         window.onblur = function() {
             send(1024,'D');
         }
@@ -339,9 +326,10 @@
 
     function no_input() {
         document.getElementById("in").style.backgroundColor = "#f1e1cd";
-        window.onkeydown = function(e) { return false; }
-        window.onkeypress = function() { return false; }
-        window.onkeyup = function() { return false; }
+        var x = document.getElementById("in");
+        x.onkeydown = function(e) { return false; }
+        x.onkeypress = function() { return false; }
+        x.onkeyup = function() { return false; }
         window.onblur = function() {}
         window.onmouseup = function() {};
         window.onmouseover = function() {};
@@ -350,7 +338,8 @@
 
     function local_input() {
         document.getElementById("in").style.backgroundColor = "#FFFFFF";
-        window.onkeydown = function(e) {
+        var x = document.getElementById("in");
+        x.onkeydown = function(e) {
             if (!e) e = window.event;
             if (e.keyCode == 115) {
                 submit_text();
@@ -359,8 +348,8 @@
             }
           return true;
         }
-        window.onkeypress = function() { return true; }
-        window.onkeyup = function() { return true; }
+        x.onkeypress = function() { return true; }
+        x.onkeyup = function() { return true; }
     }
 
     function recv_text() {
@@ -385,27 +374,44 @@
       focus_me();
       send(1024, 'D');
       direct_input();
-      WebFont.load({
-          google: {
-            families: [ 'Cantal', 'Yanone Kaffeesatz', 'Droid Sans' ]
-      }});
+      (function() {
+    	     var wf = document.createElement('script');
+    	     wf.src = ('https:' == document.location.protocol ? 'https' : 'http') +
+    	         '://ajax.googleapis.com/ajax/libs/webfont/1/webfont.js';
+    	     wf.type = 'text/javascript';
+    	     wf.async = 'true';
+    	     wf.onload = function() {
+    	         WebFont.load({
+    	             google: {
+    	               families: [ 'Cantal', 'Yanone Kaffeesatz', 'Droid Sans' ]
+    	          }});
+    	     }
+    	     var s = document.getElementsByTagName('script')[0];
+    	     s.parentNode.insertBefore(wf, s);
+    	   })();
     }
     window.onload = loadFinished;
 </script>
 <link rel="icon" type="image/png" href="/icon.png" />
 <style type="text/css">
    h1 {
-    font-family: 'Cantal', arial, serif;
     font-size: 30px;
    } 
+   .wf-active h1 {
+    font-family: 'Cantal', arial, serif;
+   }
    h2 {
-    font-family: 'Yanone Kaffeesatz', arial, serif; 
     font-size: 20px;
    }
+   .wf-active h2 {
+    font-family: 'Yanone Kaffeesatz', arial, serif; 
+   }
    div {
-    font-family: 'Droid Sans', arial, serif;
     font-size: 15px;
     padding: 3px;
+   }
+   .wf-active div {
+    font-family: 'Droid Sans', arial, serif;
    }
 
    div.footer {
@@ -413,6 +419,7 @@
     font-size: 20px;
     text-align: right;
    }
+   
    body {
     color:#000000;
     background-color:#f1f1ed;
