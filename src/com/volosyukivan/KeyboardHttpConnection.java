@@ -62,7 +62,7 @@ public final class KeyboardHttpConnection extends HttpConnection {
   public HeaderMatcher lookupRequestHandler() {
     byte[] request = this.request;
     
-    Log.d("wifikeyboard", "req: " + new String(request, 0, requestLength));
+//    Log.d("wifikeyboard", "req: " + new String(request, 0, requestLength));
     
     queryEnd = 0;
     for (int i = requestLength - 1; i >= 0; i--) {

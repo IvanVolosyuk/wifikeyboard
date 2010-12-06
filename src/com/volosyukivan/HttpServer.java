@@ -1,6 +1,7 @@
 package com.volosyukivan;
 
 import java.io.IOException;
+import java.io.InvalidObjectException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -30,6 +31,7 @@ public abstract class HttpServer extends Thread {
     this.handler = new Handler();
     this.ch = ch;
     try {
+      System.setProperty("java.net.preferIPv6Addresses", "false");
       selector = Selector.open();
     } catch (IOException e) {
       throw new RuntimeException(e);

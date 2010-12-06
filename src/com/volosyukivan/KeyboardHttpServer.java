@@ -87,7 +87,7 @@ public final class KeyboardHttpServer extends HttpServer {
   // executed by network thread
   boolean sendKey(final int code0, final boolean pressed) {
     final int code = convertKey(code0);
-    Log.d("wifikeyboard", "in: " + code0 + " out:" + code);
+//    Log.d("wifikeyboard", "in: " + code0 + " out:" + code);
     
     Object success = runAction(new KeyboardAction() {
       @Override
