@@ -8,12 +8,12 @@
 <string name="desc_toch_input_field">在任何的输入框中点击并按住保持一秒</string>
 <string name="desc_change_input_method">改变 \"输入模式\" 为 \"无线键盘\"</string>
 <string name="desc_enable_network">确定你启用了 WiFi 或 GPRS/3G 网络</string>
-<string name="desc_connect_to_one">连接你的电脑浏览器到 http://%s:%d</string>
+<string name="desc_connect_to_one">连接你的电脑浏览器到 http://%1$s:%2$d</string>
 <string name="desc_connect_to_any">连接你的电脑浏览器到以下任何一个：</string>
 <string name="desc_warn">将只会在你按照之前的步骤做了之后并在你的电脑上看到你的手机之后可用。</string>
 <string name="desc_alt_usb_cable">或者，你也可以使用USB数据线连接到你的电脑。</string>
 <string name="desc_adb_from_sdk">你需要来自Android SDK中的 \"adb\"命令行工具</string>
-<string name="desc_cmdline">在命令行界面中输入 \"adb forward tcp:%d tcp:%d\"</string>
+<string name="desc_cmdline">在命令行界面中输入 \"adb forward tcp:%1$d tcp:%2$d\"</string>
 <string name="desc_connect_local">然后连接你的电脑浏览器到 http://localhost:%d</string>
 
 <string name="page_title">无线键盘</string>

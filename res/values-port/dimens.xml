@@ -1,0 +1,7 @@
+<resources>
+<dimen name="paddingTop">4dip</dimen>
+<dimen name="marginLeft">3dip</dimen>
+<dimen name="marginRight">3dip</dimen>
+<dimen name="marginTop">13dip</dimen>
+<dimen name="marginBottom">8dip</dimen>
+</resources>

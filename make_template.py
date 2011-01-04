@@ -34,10 +34,13 @@ def parse(lang, values):
   p.ParseFile(f);
 
 def parse_R(file, values):
-  for line in open(file):
-    match = re.search(".*public static final int (.*)=0x(.*);", line)
-    if match:
-      values[match.group(1)] = match.group(2)
+  try:
+    for line in open(file):
+      match = re.search(".*public static final int (.*)=0x(.*);", line)
+      if match:
+        values[match.group(1)] = match.group(2)
+  except:
+    sys.exit(1)
 
 parse('en', values_en);
 parse_R('gen/com/volosyukivan/R.java', values_lang);

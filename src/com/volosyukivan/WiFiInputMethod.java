@@ -2,8 +2,6 @@ package com.volosyukivan;
 
 import java.util.HashSet;
 
-import com.volosyukivan.RemoteKeyListener.Stub;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -17,12 +15,16 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 
+import com.volosyukivan.RemoteKeyListener.Stub;
+
 public class WiFiInputMethod extends InputMethodService {
   public static final int KEY_HOME = -1000;
   public static final int KEY_END = -1001;
   public static final int KEY_CONTROL = -1002;
   public static final int KEY_DEL = -1003;
 
+  
+  
   @Override
   public void onStartInput(EditorInfo attribute, boolean restarting) {
     super.onStartInput(attribute, restarting);

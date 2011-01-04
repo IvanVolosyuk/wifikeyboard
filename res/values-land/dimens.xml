@@ -1,0 +1,7 @@
+<resources>
+<dimen name="paddingTop">2dip</dimen>
+<dimen name="marginLeft">10dip</dimen>
+<dimen name="marginRight">10dip</dimen>
+<dimen name="marginTop">0dip</dimen>
+<dimen name="marginBottom">0dip</dimen>
+</resources>

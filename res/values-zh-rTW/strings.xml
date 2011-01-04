@@ -8,12 +8,12 @@
 <string name="desc_toch_input_field">在任何的輸入方塊中點擊並按住保持一秒</string>
 <string name="desc_change_input_method">改變 \"輸入模式\" 為 \"無線鍵盤\"</string>
 <string name="desc_enable_network">確定你啟用了 WiFi 或 GPRS/3G 網路</string>
-<string name="desc_connect_to_one">連接你的電腦瀏覽器到 http://%s:%d</string>
+<string name="desc_connect_to_one">連接你的電腦瀏覽器到 http://%1$s:%2$d</string>
 <string name="desc_connect_to_any">連接你的電腦瀏覽器到以下任何一個：</string>
 <string name="desc_warn">將只會在你按照之前的步驟做了之後並在你的電腦上看到你的手機之後可用。</string>
 <string name="desc_alt_usb_cable">或者，你也可以使用USB資料線連接到你的電腦。</string>
 <string name="desc_adb_from_sdk">你需要來自Android SDK中的 \"adb\"命令列工具</string>
-<string name="desc_cmdline">在命令列介面中輸入 \"adb forward tcp:%d tcp:%d\"</string>
+<string name="desc_cmdline">在命令列介面中輸入 \"adb forward tcp:%1$d tcp:%2$d\"</string>
 <string name="desc_connect_local">然後連接你的電腦瀏覽器到 http://localhost:%d</string>
 
 <string name="page_title">無線鍵盤</string>

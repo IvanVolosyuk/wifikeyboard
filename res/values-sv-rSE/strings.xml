@@ -8,12 +8,12 @@
 <string name="desc_toch_input_field">Tryck och håll på valfri textruta i en sekund</string>
 <string name="desc_change_input_method">Ändra \"Inmatningsmetod\" till \"WiFiKeyboard\"</string>
 <string name="desc_enable_network">Försäkra dig om att du har aktiverat WiFi eller GPRS/3G</string>
-<string name="desc_connect_to_one">Gå till http://%s:%d i din dators webbläsare</string>
+<string name="desc_connect_to_one">Gå till http://%1$s:%2$d i din dators webbläsare</string>
 <string name="desc_connect_to_any">Gå till någon av dessa med din dators webbläsare:</string>
 <string name="desc_warn">Detta kommer bara att fungera om du gjorde föregående steg och din telefon är synlig från din dator.</string>
 <string name="desc_alt_usb_cable">Alternativt kan du använda en USB-kabel för att ansluta till din dator</string>
 <string name="desc_adb_from_sdk">Du behöver \"adb\" från Android SDK</string>
-<string name="desc_cmdline">Skriv in \"adb forward tcp:%d tcp:%d\" i kommandoraden på datorn</string>
+<string name="desc_cmdline">Skriv in \"adb forward tcp:%1$d tcp:%2$d\" i kommandoraden på datorn</string>
 <string name="desc_connect_local">Och gå till http://localhost:%d i din dators webbläsare</string>
 
 <string name="page_title">WiFi&amp;nbsp;Keyboard</string>

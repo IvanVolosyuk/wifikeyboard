@@ -8,12 +8,12 @@
 <string name="desc_toch_input_field">On any text input touch and hold for a second</string>
 <string name="desc_change_input_method">Change \"InputMethod\" to \"WiFiKeyboard\"</string>
 <string name="desc_enable_network">Ensure you have enabled WiFi or GPRS/3G network</string>
-<string name="desc_connect_to_one">Connect your computer\'s browser to http://%s:%d</string>
+<string name="desc_connect_to_one">Connect your computer\'s browser to http://%1$s:%2$d</string>
 <string name="desc_connect_to_any">Connect your computer\'s browser to any of:</string>
 <string name="desc_warn">This will only work if you did previous steps and your phone is visible from your computer.</string>
 <string name="desc_alt_usb_cable">Alternatively you can use usb cable to connect to your computer</string>
 <string name="desc_adb_from_sdk">You need \"adb\" command from Android SDK</string>
-<string name="desc_cmdline">Type \"adb forward tcp:%d tcp:%d\" in command line</string>
+<string name="desc_cmdline">Type \"adb forward tcp:%1$d tcp:%2$d\" in command line</string>
 <string name="desc_connect_local">And connect your computer\'s browser to http://localhost:%d</string>
 
 <string name="page_title">WiFi&amp;nbsp;Keyboard</string>

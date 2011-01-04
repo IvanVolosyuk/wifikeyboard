@@ -8,12 +8,12 @@
 <string name="desc_toch_input_field">Voer een lange druk uit op een tekst invoer veld</string>
 <string name="desc_change_input_method">Verander de \"Invoermethode\" naar \"WiFiKeyboard\"</string>
 <string name="desc_enable_network">Verzeker u ervan dat WiFi of GPRS/3G geactiveerd is</string>
-<string name="desc_connect_to_one">Ga met de browser op uw computer naar http://%s:%d</string>
+<string name="desc_connect_to_one">Ga met de browser op uw computer naar http://%1$s:%2$d</string>
 <string name="desc_connect_to_any">Ga met de browser op uw computer naar een van de volgende:</string>
 <string name="desc_warn">Dit zal alleen werken als u al de vorige stappen deed en uw telefoon verbonden is met uw computer.</string>
 <string name="desc_alt_usb_cable">Als alternatief kan u uw usb kabel gebruiken om een verbinding te maken met de computer</string>
 <string name="desc_adb_from_sdk">U heeft het \"adb\" commando van de Android SDK nodig</string>
-<string name="desc_cmdline">Voer \"adb forward tcp:%d tcp:%d\" in op de command line</string>
+<string name="desc_cmdline">Voer \"adb forward tcp:%1$d tcp:%2$d\" in op de command line</string>
 <string name="desc_connect_local">En ga met de browser op uw computer naar http://localhost:%d</string>
 
 <string name="page_title">WiFi&amp;nbsp;Toetsenbord</string>

@@ -8,12 +8,12 @@
 <string name="desc_toch_input_field">Нажмите и удерживайте палец на любом поле ввода текста.</string>
 <string name="desc_change_input_method">Измените \"Способ ввода\" на \"WiFi Клавиатуру\"</string>
 <string name="desc_enable_network">Проверьте что включен WiFi или GPRS/3G</string>
-<string name="desc_connect_to_one">На компьютере откройте веб страницу с адресом: http://%s:%d</string>
+<string name="desc_connect_to_one">На компьютере откройте веб страницу с адресом: http://%1$s:%2$d</string>
 <string name="desc_connect_to_any">На компьютере откройте веб страницу с любым из адресов:</string>
 <string name="desc_warn">Клавиатура будет работать если вы выполните все эти шаги.</string>
 <string name="desc_alt_usb_cable">В качестве альтернативного варианта можно использовать соединение через USB:</string>
 <string name="desc_adb_from_sdk">Вам понадобится программа \"adb\" из Android SDK</string>
-<string name="desc_cmdline">Выполните команду \"adb forward tcp:%d tcp:%d\" на вашем компьютере.</string>
+<string name="desc_cmdline">Выполните команду \"adb forward tcp:%1$d tcp:%2$d\" на вашем компьютере.</string>
 <string name="desc_connect_local">И откройте веб страницу по адресу: http://localhost:%d</string>
 
 <string name="page_title">WiFi&amp;nbsp;Клавиатура</string>
