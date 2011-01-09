@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.appwidget.AppWidgetManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -16,8 +17,9 @@ import android.widget.RemoteViews;
 import android.widget.CompoundButton.OnCheckedChangeListener;
 
 public class WidgetConfigure extends Activity {
-  private int mAppWidgetId;
+  private static final String PREFS_WIDGETS = "widgets";
   
+  private int mAppWidgetId;
   
   @Override
   protected void onCreate(Bundle savedInstanceState) {
@@ -39,10 +41,17 @@ public class WidgetConfigure extends Activity {
     ok.setOnClickListener(new OnClickListener() {
       @Override
       public void onClick(View v) {
+        SharedPreferences prefs = getSharedPreferences(PREFS_WIDGETS, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(textEnableProperty(mAppWidgetId), enabled.isChecked());
+        editor.putString(textStringProperty(mAppWidgetId), editText.getText().toString());
+        editor.commit();
+        WidgetProvider.log(WidgetConfigure.this, "Widget " + mAppWidgetId + " configured");
+
+        
         AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(WidgetConfigure.this);
         updateWidget(
-            WidgetConfigure.this, appWidgetManager, mAppWidgetId,
-            enabled.isChecked(), editText.getText().toString());
+            WidgetConfigure.this, appWidgetManager, mAppWidgetId);
         Intent resultValue = new Intent();
         resultValue.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, mAppWidgetId);
         setResult(RESULT_OK, resultValue);
@@ -68,10 +77,29 @@ public class WidgetConfigure extends Activity {
     setResult(RESULT_CANCELED, resultValue);
   }
   
+  static String textEnableProperty(int id) {
+    return "textEnable:" + Integer.toString(id);
+  }
+  
+  static String textStringProperty(int id) {
+    return "textString:" + Integer.toString(id);
+  }
+  
+  static void deleteWidget(Context context, int id) {
+    SharedPreferences.Editor editor =
+      context.getSharedPreferences(PREFS_WIDGETS, Context.MODE_PRIVATE).edit();
+    editor.remove(textEnableProperty(id));
+    editor.remove(textStringProperty(id));
+    editor.commit();
+  }
+  
   static void updateWidget(
-      Context context, AppWidgetManager appWidgetManager, int id,
-      boolean textEnable, String text) {
-    RemoteViews view = new RemoteViews(context.getClass().getPackage().getName(), R.layout.widget);
+      Context context, AppWidgetManager appWidgetManager, int id) {
+    SharedPreferences prefs =
+      context.getSharedPreferences(PREFS_WIDGETS, Context.MODE_PRIVATE);
+    boolean textEnable = prefs.getBoolean(textEnableProperty(id), true);
+    String text = prefs.getString(textStringProperty(id), "WiFiKeyboard");
+    RemoteViews view = new RemoteViews("com.volosyukivan", R.layout.widget);
     if (!textEnable) view.setViewVisibility(R.id.text, View.GONE);
     else view.setTextViewText(R.id.text, text);
     view.setImageViewResource(R.id.icon, R.drawable.icon);
