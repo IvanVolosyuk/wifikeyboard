@@ -310,6 +310,7 @@
         x.onkeypress = press;
         window.onblur = function() {
             send(1024,'D');
+            focus_me();
         }
         window.onfocus = focus_me;
         window.onmouseup = function() {
@@ -467,7 +468,7 @@
   <li>Insert or F1 = DPAD Center</li>
   <li>F2 = Menu</li>
   <li>F3 = Search</li>
-  <li>Escape = BACK</li>
+  <li>Escape,F5 = BACK</li>
   <li>F9, F10 = Volume control</li>
   <li><font color="red">F4 = Edit locally/ submit (alpha)</font></li>
   </ul>

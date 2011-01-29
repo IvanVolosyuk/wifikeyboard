@@ -2,16 +2,21 @@ package com.volosyukivan;
 
 import java.util.HashSet;
 
+import org.apache.http.impl.client.DefaultProxyAuthenticationHandler;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.inputmethodservice.ExtractEditText;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 
@@ -204,6 +209,27 @@ public class WiFiInputMethod extends InputMethodService {
       return;
     }
     
+    if (code == KeyEvent.KEYCODE_DPAD_LEFT && pressedKeys.contains(KEY_CONTROL)) {
+      if (down == false) return;
+      wordLeft(conn);
+      return;
+    } else if (code == KeyEvent.KEYCODE_DPAD_RIGHT && pressedKeys.contains(KEY_CONTROL)) {
+      if (down == false) return;
+      wordRight(conn);
+      return;
+    } else if (code == KeyEvent.KEYCODE_DPAD_CENTER) {
+      if (pressedKeys.contains(KEY_CONTROL)) {
+        if (!down) return;
+        copy(conn);
+        return;
+      }
+      if (pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT)) {
+        if (!down) return;
+        paste(conn);
+        return;
+      }
+    }
+    
 //    if (pressedKeys.contains(KEY_CONTROL)) {
 //      if (down == false) return;
 //      switch (code) {
@@ -225,6 +251,10 @@ public class WiFiInputMethod extends InputMethodService {
   }
   
   private void keyDel(InputConnection conn) {
+    if (pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT)) {
+      cut(conn);
+      return;
+    }
     conn.deleteSurroundingText(0, 1);
     conn.commitText("", 0);
   }
@@ -242,43 +272,90 @@ public class WiFiInputMethod extends InputMethodService {
   }
 
   private void selectAll(InputConnection conn) {
-    conn.performContextMenuAction(android.R.id.selectAll);
+    ExtractedText text = conn.getExtractedText(req, 0);
+    conn.setSelection(0, text.text.length());
   }
   
-  private void move(InputConnection conn, int num, boolean left) {
-    int code = left ? KeyEvent.KEYCODE_DPAD_LEFT : KeyEvent.KEYCODE_DPAD_RIGHT;
-    for (int i = 0; i < num; i++) {
-      conn.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, code));
-      conn.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP, code));
+  ExtractedTextRequest req = new ExtractedTextRequest();
+  {
+    req.hintMaxChars = 100000;
+    req.hintMaxLines = 10000;
+  }
+  
+  private void wordRight(InputConnection conn) {
+    boolean shift = pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT);
+    ExtractedText text = conn.getExtractedText(req, 0);
+    if (text == null) return;
+    
+    int end = text.selectionEnd;
+    String str = text.text.toString();
+    int len = str.length();
+    
+    for (; end < len; end++) {
+      if (!Character.isSpace(str.charAt(end))) break;
     }
+    for (; end < len; end++) {
+      if (Character.isSpace(str.charAt(end))) break;
+    }
+    int start = shift ? text.selectionStart : end;
+    Log.d("wifikeyboard", "start = " + start + " end = " + end);
+    conn.setSelection(start, end);
+  }
+  
+  private void wordLeft(InputConnection conn) {
+    boolean shift = pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT);
+    ExtractedText text = conn.getExtractedText(req, 0);
+    if (text == null) return;
+    
+    int end = text.selectionEnd - 1;
+    
+    String str = text.text.toString();
+    
+    for (; end >= 0; end--) {
+      if (!Character.isSpace(str.charAt(end))) break;
+    }
+    for (; end >= 0; end--) {
+      if (Character.isSpace(str.charAt(end))) break;
+    }
+    end++;
+    int start = shift ? text.selectionStart : end;
+    Log.d("wifikeyboard", "start = " + start + " end = " + end);
+    conn.setSelection(start, end);
   }
 
   private void keyEnd(InputConnection conn) {
     boolean control = pressedKeys.contains(KEY_CONTROL);
-    String text = conn.getTextAfterCursor(100000, 0).toString();
-    int len;
+    boolean shift = pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT);
+    ExtractedText text = conn.getExtractedText(req, 0);
+    if (text == null) return;
+    int end;
     if (control) {
-      len = text.length();
+      end = text.text.length();
     } else {
-      len = text.indexOf('\n');
-      if (len == -1) len = text.length();
+      end = text.text.toString().indexOf('\n', text.selectionEnd);
+      if (end == -1) end = text.text.length(); 
     }
-    move(conn, len, false);
+    int start = shift ? text.selectionStart : end;
+    Log.d("wifikeyboard", "start = " + start + " end = " + end);
+    conn.setSelection(start, end);
   }
 
   private void keyHome(InputConnection conn) {
     boolean control = pressedKeys.contains(KEY_CONTROL);
-    String text = conn.getTextBeforeCursor(100000, 0).toString();
-    int len;
+    boolean shift = pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT);
+    ExtractedText text = conn.getExtractedText(req, 0);
+    if (text == null) return;
+    
+    int end;
     if (control) {
-      len = text.length();
+      end = 0;
     } else {
-      len = text.length() - text.lastIndexOf('\n') - 1;
-      if (len == -1) {
-        len = text.length();
-      }
+      end = text.text.toString().lastIndexOf('\n', text.selectionEnd - 1);
+      end++;
     }
-    move(conn, len, true);
+    int start = shift ? text.selectionStart : end;
+    Log.d("wifikeyboard", "start = " + start + " end = " + end);
+   conn.setSelection(start, end);
   }
 
   boolean setText(String text) {

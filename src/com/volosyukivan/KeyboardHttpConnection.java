@@ -193,7 +193,9 @@ public final class KeyboardHttpConnection extends HttpConnection {
   private ByteBuffer onTextRequest() {
     byte[] text = null;
     try {
-      text = ((String)(server.getText())).getBytes("UTF-8");
+      if (server != null) {
+        text = ((String)(server.getText())).getBytes("UTF-8");
+      }
     } catch (UnsupportedEncodingException e) {
     }
     if (text == null) {
