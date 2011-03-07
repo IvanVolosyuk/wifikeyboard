@@ -127,12 +127,11 @@ public class WiFiInputMethod extends InputMethodService {
     
     if (pressedKeys.contains(KEY_CONTROL)) {
       switch (code) {
-      case 'a':case 'A': selectAll(conn); break;
-      case 'x':case 'X': cut(conn); break;
-      case 'c':case 'C': copy(conn); break;
-      case 'v':case 'V': paste(conn); break;
+      case 'a':case 'A': selectAll(conn); return;
+      case 'x':case 'X': cut(conn); return;
+      case 'c':case 'C': copy(conn); return;
+      case 'v':case 'V': paste(conn); return;
       }
-      return;
     }
 
     String text = null; 
