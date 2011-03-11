@@ -194,7 +194,11 @@ public final class KeyboardHttpConnection extends HttpConnection {
     byte[] text = null;
     try {
       if (server != null) {
-        text = ((String)(server.getText())).getBytes("UTF-8");
+        try {
+          text = ((String)(server.getText())).getBytes("UTF-8");
+        } catch (NullPointerException e) {
+          Log.e("wifikeyboard", "no text", e);
+        }
       }
     } catch (UnsupportedEncodingException e) {
     }
