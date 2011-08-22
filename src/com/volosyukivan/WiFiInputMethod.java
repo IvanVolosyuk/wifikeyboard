@@ -272,7 +272,11 @@ public class WiFiInputMethod extends InputMethodService {
 
   private void selectAll(InputConnection conn) {
     ExtractedText text = conn.getExtractedText(req, 0);
-    conn.setSelection(0, text.text.length());
+    try {
+      conn.setSelection(0, text.text.length());
+    } catch (NullPointerException e) {
+      // Potentially, text or text.text can be null
+    }
   }
   
   ExtractedTextRequest req = new ExtractedTextRequest();
