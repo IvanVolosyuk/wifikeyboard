@@ -105,10 +105,13 @@ public class HttpService extends Service {
   private void updateNotification(boolean ticker) {
     long when = System.currentTimeMillis();
     ArrayList<String> addrs = WiFiKeyboard.getNetworkAddresses();
-    String addr;
-    if (addrs.size() > 0) {
-      addr = "http://" + addrs.get(0) + ":" + port;
-    } else {
+    String addr = null;
+    for (String newAddr : addrs) {
+      if (addr == null || addr.contains("::")) {
+        addr = "http://" + newAddr + ":" + port;
+      }
+    }
+    if (addr == null) {
       addr = "Port: " + port;
     }
     String tickerText = addr + " - WiFiKeyboard";
