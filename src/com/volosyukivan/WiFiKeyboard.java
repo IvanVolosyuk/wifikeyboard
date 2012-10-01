@@ -18,11 +18,15 @@
  */
 package com.volosyukivan;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.nio.channels.ServerSocketChannel;
 import java.util.ArrayList;
 import java.util.Enumeration;
+
+import com.volosyukivan.PortUpdateListener.Stub;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -31,18 +35,14 @@ import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.View;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
-import com.volosyukivan.PortUpdateListener.Stub;
 
 public class WiFiKeyboard extends Activity {
     int port = 7777;
     LinearLayout layout;
     ServiceConnection serviceConnection;
-    private RemoteKeyboard remoteKeyboard;
     
     public static ArrayList<String> getNetworkAddresses() {
       ArrayList<String> addrs = new ArrayList<String>();
@@ -98,21 +98,6 @@ public class WiFiKeyboard extends Activity {
       text(R.string.desc_adb_from_sdk);
       text(getString(R.string.desc_cmdline, port, port), 15);
       text(getString(R.string.desc_connect_local, port), 15);
-      text("", 15);
-      text(getString(R.string.desc_reset_session), 15);
-      Button b = new Button(this);
-      b.setText(R.string.reset_session);
-      b.setOnClickListener(new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-          try {
-            if (remoteKeyboard != null)
-              remoteKeyboard.resetSession();
-          } catch (RemoteException e) {
-          }
-        }
-      });
-      layout.addView(b);
       return parent;
     }
     
@@ -148,9 +133,7 @@ public class WiFiKeyboard extends Activity {
                   }
                 }
               };
-              remoteKeyboard = RemoteKeyboard.Stub.asInterface(service);
-              remoteKeyboard.setPortUpdateListener(listener);
-
+              RemoteKeyboard.Stub.asInterface(service).setPortUpdateListener(listener);
             } catch (RemoteException e) {
               throw new RuntimeException(
                   "WiFiInputMethod failed to connected to HttpService.", e);

@@ -57,7 +57,6 @@
     stat = null;
     inp = null;
     typed_chars = 0;
-    session = null;
 
 
     function onConfirm(newConfirmed) {
@@ -128,8 +127,6 @@
         }
         if (xhr.responseText == "problem") {
 	  setDisplayState("problem");
-	} else if (xhr.responseText == "denied") {
-	  session = null;
         } else if (xhr.responseText == "multi") {
 	  setDisplayState("multi");
         } else {
@@ -145,44 +142,14 @@
 	setDisplayState("failure");
 	makeXhr();
       }, 3000);
-      xhr.open('GET', "/key?" + session + "," + sentNewConfirmed + "," + data, true);
+      xhr.open('GET', "/key?" + sentNewConfirmed + "," + data, true);
       xhr.send(null);
       return xhr;
-    }
-
-    function initSession() {
-      var xhr = new XMLHttpRequest();
-      num_inflight += 1;
-      xhr.onreadystatechange = function() {
-	if (xhr.readyState != 4) return;
-	num_inflight -= 1;
-
-        if (xhr.status != 200) {
-	  setDisplayState("failure")
-	  if (num_delayed == 0) {
-	    num_delayed = 1;
-            setTimeout("networkDelayed();", 2000);
-	  }
-	  return;
-        }
-        if (xhr.responseText == "denied") {
-	  setDisplayState("denied");
-        } else {
-	  session = xhr.responseText;
-	  network();
-        }
-      }
-      xhr.open('GET', "/init", true);
-      xhr.send(null);
     }
 
     function network() {
       if (seqConfirmed == seqPressed) return;
       if (num_inflight > 0) return;
-      if (session == null) {
-        initSession();
-      	return;
-      }
 
       //seq = seq + 1;
       //if (data.length > 200) data = data.substring(0, 200);
@@ -324,10 +291,6 @@
         stat.innerHTML = "Connection problem";
         stat["color"] = "red";
         xcomment.innerHTML = "No connection between the phone and computer.";
-      } else if (newState == "denied") {
-        stat.innerHTML = "Session busy";
-        stat["color"] = "red";
-        xcomment.innerHTML = 'Press "Reset session" in WiFi Keyboard window.';
       } else if (newState == "problem") {
         stat.innerHTML = "Not typing";
         stat["color"] = "red";

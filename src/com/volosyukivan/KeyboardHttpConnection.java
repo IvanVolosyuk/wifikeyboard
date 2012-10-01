@@ -18,7 +18,6 @@
  */
 package com.volosyukivan;
 
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -26,7 +25,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.Random;
 import java.util.TreeMap;
 
 import android.util.Log;
@@ -42,7 +40,6 @@ public final class KeyboardHttpConnection extends HttpConnection {
   private static final byte[] Q_DEFAULT = "".getBytes();
   private static final byte[] Q_BG_GIF = "bg.gif".getBytes();
   private static final byte[] Q_ICON_PNG = "icon.png".getBytes();
-  private static final byte[] Q_INIT = "init".getBytes();
   
   private static final byte[][] patterns = {
     Q_KEY,
@@ -52,7 +49,6 @@ public final class KeyboardHttpConnection extends HttpConnection {
     Q_DEFAULT,
     Q_BG_GIF,
     Q_ICON_PNG,
-    Q_INIT,
   };
   
   private static final int H_KEY = 0;
@@ -62,7 +58,6 @@ public final class KeyboardHttpConnection extends HttpConnection {
   private static final int H_DEFAULT = 4;
   private static final int H_BG_GIF = 5;
   private static final int H_ICON_PNG = 6;
-  private static final int H_INIT = 7;
   
   private int requestType;
   
@@ -172,7 +167,6 @@ public final class KeyboardHttpConnection extends HttpConnection {
     case H_BG_GIF: return onBgGifRequest();
     case H_ICON_PNG: return onIconPngRequest();
     case H_WAIT: return onWaitRequest();
-    case H_INIT: return onInitRequest();
     default: return onDefaultRequest();
     }
   }
@@ -180,49 +174,6 @@ public final class KeyboardHttpConnection extends HttpConnection {
   private ByteBuffer onWaitRequest() {
     server.addWaitingConnection(KeyboardHttpConnection.this);
     return null;
-  }
-  
-  private char sessionChar(int in) {
-    char range1 = 'Z' - 'A';
-    char range2 = 'z' - 'a';
-    char range3 = '9' - '0';
-    in = (in + 256) % (range1 + range2 + range3);
-    if (in < range1) {
-      return (char)(in + 'A');
-    }
-    in -= range1;
-    if (in < range2) {
-      return (char)(in + 'a');
-    }
-    in -= range2;
-    return (char)(in + '0');
-  }
-  
-  private String newSessionId() {
-    try {
-      FileInputStream is = new FileInputStream("/dev/random");
-      byte[] buf = new byte[4];
-      is.read(buf);
-      is.close();
-      StringBuilder b = new StringBuilder();
-      for (int i = 0; i < 4; i++) {
-        b.append(sessionChar(buf[i]));
-      }
-      return b.toString();
-    } catch (IOException e) {
-      return "fail";
-    }
-  }
-  
-  private ByteBuffer onInitRequest() {
-    byte[] content = null;
-    if (server.session == null) {
-      server.session = newSessionId();
-      content = server.session.getBytes();
-    } else {
-      content = "denied".getBytes();
-    }
-    return sendData("text/plain", content, content.length);
   }
 
   private ByteBuffer onIconPngRequest() {

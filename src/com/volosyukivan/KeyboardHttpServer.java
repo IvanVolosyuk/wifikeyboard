@@ -31,7 +31,6 @@ import android.util.Log;
 
 public final class KeyboardHttpServer extends HttpServer {
   private HttpService service;
-  String session;
   static final int FOCUS = 1024;
   private int seqNum = 0;
   ArrayList<KeyboardHttpConnection> waitingConnections =
@@ -54,18 +53,15 @@ public final class KeyboardHttpServer extends HttpServer {
     boolean success = true;
     boolean event = false;
     String[] ev = req.split(",", -1);
-    if (session == null || !session.equals(ev[0])) {
-      return "denied";
-    }
-    int seq = Integer.parseInt(ev[1]);
+    int seq = Integer.parseInt(ev[0]);
     int numKeysRequired = seq - seqNum;
     if (numKeysRequired <= 0) {
       return "multi";
     }
-    int numKeysAvailable = ev.length - 3;
+    int numKeysAvailable = ev.length - 2;
     int numKeys = Math.min(numKeysAvailable, numKeysRequired);
 
-    for (int i = numKeys + 1; i >= 2; i--) {
+    for (int i = numKeys; i >= 1; i--) {
 //      Debug.d("Event: " + ev[i]);
       char mode = ev[i].charAt(0);
       int code = Integer.parseInt(ev[i].substring(1));

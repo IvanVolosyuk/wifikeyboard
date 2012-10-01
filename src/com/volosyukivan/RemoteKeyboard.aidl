@@ -28,5 +28,4 @@ interface RemoteKeyboard {
     void setPortUpdateListener(PortUpdateListener listener);
     void startTextEdit(String content);
     void stopTextEdit();
-    void resetSession();
 }

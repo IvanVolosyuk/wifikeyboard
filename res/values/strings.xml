@@ -33,8 +33,6 @@
 <string name="desc_adb_from_sdk">You need \"adb\" command from Android SDK</string>
 <string name="desc_cmdline">Type \"adb forward tcp:%1$d tcp:%2$d\" in command line</string>
 <string name="desc_connect_local">And connect your computer\'s browser to http://localhost:%d</string>
-<string name="desc_reset_session">If you see "Session busy" message in browser, press this button:</string>
-<string name="reset_session">Reset session</string>
 
 <string name="page_title">WiFi&amp;nbsp;Keyboard</string>
 <string name="conn_problem_title">Connection problem</string>

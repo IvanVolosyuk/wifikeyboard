@@ -77,10 +77,6 @@ public class HttpService extends Service {
 //        Debug.d("Removed listener");
       }
     }
-    
-    public void resetSession() throws RemoteException {
-      server.session = null;
-    }
 
     @Override
     public void startTextEdit(String content) throws RemoteException {
