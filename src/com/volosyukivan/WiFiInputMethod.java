@@ -133,7 +133,12 @@ public class WiFiInputMethod extends InputMethodService {
       throw new RuntimeException("failed to connect to HttpService");
     }
   }
-  
+
+  @Override
+  public boolean onEvaluateFullscreenMode() {
+    return false;
+  }
+
   void receivedChar(int code) {
     wakeLock.acquire();
     wakeLock.release();
