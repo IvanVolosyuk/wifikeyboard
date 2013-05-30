@@ -33,8 +33,6 @@
 <string name="desc_adb_from_sdk">Necesitas el comando \"adb\" del Android SDK</string>
 <string name="desc_cmdline">Escribe \"adb forward tcp:%1$d tcp:%2$d\" en consola</string>
 <string name="desc_connect_local">En el navegador de tu ordenador, dirígete a http://localhost:%d</string>
-<string name="desc_reset_session">Si en el navegador te aparece el mensaje "Sesión ocupada", pulsa este botón:</string>
-<string name="reset_session">Reiniciar sesión</string>
 
 <string name="page_title">WiFi&amp;nbsp;Keyboard</string>
 <string name="conn_problem_title">Problema al conexión</string>

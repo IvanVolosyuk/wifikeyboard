@@ -32,6 +32,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.view.View;
@@ -43,7 +44,7 @@ public class WiFiKeyboard extends Activity {
     int port = 7777;
     LinearLayout layout;
     ServiceConnection serviceConnection;
-    
+
     public static ArrayList<String> getNetworkAddresses() {
       ArrayList<String> addrs = new ArrayList<String>();
       try {
@@ -63,7 +64,7 @@ public class WiFiKeyboard extends Activity {
       }
       return addrs;
     }
-    
+
     private View createView() {
       ArrayList<String> addrs = getNetworkAddresses();
       ScrollView parent = new ScrollView(this);
@@ -79,7 +80,12 @@ public class WiFiKeyboard extends Activity {
       text(R.string.desc_setup_wifi, 20);
       text(R.string.desc_goto_settings);
       text(R.string.desc_enable_kbd);
-      text(R.string.desc_toch_input_field);
+      final int sdkVersion = Integer.parseInt(Build.VERSION.SDK);
+      if (sdkVersion >= Build.VERSION_CODES.HONEYCOMB) {
+        text(R.string.desc_toch_input_field_honeycomb);
+      } else {
+        text(R.string.desc_toch_input_field);
+      }
       text(R.string.desc_change_input_method);
       text("", 15);
       if (addrs.size() == 0) {
@@ -100,11 +106,11 @@ public class WiFiKeyboard extends Activity {
       text(getString(R.string.desc_connect_local, port), 15);
       return parent;
     }
-    
+
     @Override
     public void onResume() {
         super.onResume();
-        
+
 //        // FIXME: block default port out of use
 //        ServerSocketChannel ch;
 //        try {
@@ -118,7 +124,7 @@ public class WiFiKeyboard extends Activity {
 //          // TODO Auto-generated catch block
 //          e1.printStackTrace();
 //        }
-        
+
         serviceConnection = new ServiceConnection() {
           //@Override
           public void onServiceConnected(ComponentName name, IBinder service) {
@@ -151,22 +157,22 @@ public class WiFiKeyboard extends Activity {
 
         setContentView(createView());
     }
-    
+
     @Override
     protected void onPause() {
       super.onPause();
       this.unbindService(serviceConnection);
     }
-    
+
     private void text(int resId) {
       text(resId, 15);
     }
-    
+
     private void text(int resId, int fontSize) {
       String msg = getString(resId);
       text(msg, fontSize);
     }
-    
+
     private void text(String msg, int fontSize) {
       TextView v = new TextView(this);
       v.setText(msg);
