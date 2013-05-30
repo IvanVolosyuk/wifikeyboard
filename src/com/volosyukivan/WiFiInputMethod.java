@@ -20,17 +20,15 @@ package com.volosyukivan;
 
 import java.util.HashSet;
 
-import org.apache.http.impl.client.DefaultProxyAuthenticationHandler;
-
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.inputmethodservice.ExtractEditText;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
+import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
@@ -46,8 +44,6 @@ public class WiFiInputMethod extends InputMethodService {
   public static final int KEY_CONTROL = -1002;
   public static final int KEY_DEL = -1003;
 
-  
-  
   @Override
   public void onStartInput(EditorInfo attribute, boolean restarting) {
     super.onStartInput(attribute, restarting);
@@ -83,7 +79,7 @@ public class WiFiInputMethod extends InputMethodService {
 
   PowerManager.WakeLock wakeLock;
   HashSet<Integer> pressedKeys = new HashSet<Integer>();
-  
+
   @Override
   public void onCreate() {
     super.onCreate();
@@ -92,7 +88,6 @@ public class WiFiInputMethod extends InputMethodService {
         PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.ON_AFTER_RELEASE, "wifikeyboard");
 //    Debug.d("WiFiInputMethod started");
     serviceConnection = new ServiceConnection() {
-      //@Override
       public void onServiceConnected(ComponentName name, IBinder service) {
 //        Debug.d("WiFiInputMethod connected to HttpService.");
         try {
@@ -127,7 +122,7 @@ public class WiFiInputMethod extends InputMethodService {
       public void onServiceDisconnected(ComponentName name) {
 //        Debug.d("WiFiInputMethod disconnected from HttpService.");
       }
-    }; 
+    };
     if (this.bindService(new Intent(this, HttpService.class),
         serviceConnection, BIND_AUTO_CREATE) == false) {
       throw new RuntimeException("failed to connect to HttpService");
@@ -147,7 +142,7 @@ public class WiFiInputMethod extends InputMethodService {
 //      Debug.d("connection closed");
       return;
     }
-    
+
     if (pressedKeys.contains(KEY_CONTROL)) {
       switch (code) {
       case 'a':case 'A': selectAll(conn); return;
@@ -157,7 +152,7 @@ public class WiFiInputMethod extends InputMethodService {
       }
     }
 
-    String text = null; 
+    String text = null;
     if (code >= 0 && code <= 65535) {
       text = new String(new char[] { (char) code } );
     } else {
@@ -169,7 +164,7 @@ public class WiFiInputMethod extends InputMethodService {
     }
     conn.commitText(text, 1);
   }
-  
+
   void receivedKey(int code, boolean pressed) {
     if (code == KeyboardHttpServer.FOCUS) {
       for (int key : pressedKeys) {
@@ -197,7 +192,7 @@ public class WiFiInputMethod extends InputMethodService {
       sendKey(code, pressed, pressedKeys.isEmpty());
     }
   }
-  
+
   void resetModifiers() {
     InputConnection conn = getCurrentInputConnection();
     if (conn == null) {
@@ -206,9 +201,9 @@ public class WiFiInputMethod extends InputMethodService {
     conn.clearMetaKeyStates(
         KeyEvent.META_ALT_ON | KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON);
   }
-  
+
   private long lastWake;
-  
+
   void sendKey(int code, boolean down, boolean resetModifiers) {
     long time = System.currentTimeMillis();
     if (time - lastWake > 5000) {
@@ -230,28 +225,49 @@ public class WiFiInputMethod extends InputMethodService {
       }
       return;
     }
-    
-    if (code == KeyEvent.KEYCODE_DPAD_LEFT && pressedKeys.contains(KEY_CONTROL)) {
-      if (down == false) return;
-      wordLeft(conn);
-      return;
-    } else if (code == KeyEvent.KEYCODE_DPAD_RIGHT && pressedKeys.contains(KEY_CONTROL)) {
-      if (down == false) return;
-      wordRight(conn);
-      return;
-    } else if (code == KeyEvent.KEYCODE_DPAD_CENTER) {
-      if (pressedKeys.contains(KEY_CONTROL)) {
-        if (!down) return;
-        copy(conn);
-        return;
+
+    if (pressedKeys.contains(KEY_CONTROL)) {
+      switch (code) {
+        case KeyEvent.KEYCODE_DPAD_LEFT:
+          if (!down) return;
+          wordLeft(conn);
+          return;
+        case KeyEvent.KEYCODE_DPAD_RIGHT:
+          if (!down) return;
+          wordRight(conn);
+          return;
+        case KeyEvent.KEYCODE_DEL:
+          if (!down) return;
+          deleteWordLeft(conn);
+          return;
+        case KeyEvent.KEYCODE_FORWARD_DEL:
+          deleteWordRight(conn);
+          return;
+        case KeyEvent.KEYCODE_DPAD_CENTER:
+          if (!down) return;
+          copy(conn);
+          return;
       }
-      if (pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT)) {
+    }
+
+    if (pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT)) {
+      switch (code) {
+        case KeyEvent.KEYCODE_DPAD_CENTER:
+          if (!down) return;
+          paste(conn);
+          return;
+      }
+    }
+
+    if (code == KeyEvent.KEYCODE_ENTER) {
+      if (shouldSend()) {
         if (!down) return;
-        paste(conn);
+        Log.d("wifikeyboard", "submit");
+        conn.performEditorAction(EditorInfo.IME_ACTION_SEND);
         return;
       }
     }
-    
+
 //    if (pressedKeys.contains(KEY_CONTROL)) {
 //      if (down == false) return;
 //      switch (code) {
@@ -262,17 +278,45 @@ public class WiFiInputMethod extends InputMethodService {
 //      }
 //      return;
 //    }
-    
-    
+
     conn.sendKeyEvent(new KeyEvent(
-        down ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP, code));
+        android.os.SystemClock.uptimeMillis(),
+        android.os.SystemClock.uptimeMillis(),
+        down ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP,
+            code,
+            0,
+            (pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT)
+                ? KeyEvent.META_SHIFT_LEFT_ON : 0) +
+            (pressedKeys.contains(KEY_CONTROL)? KeyEvent.META_CTRL_ON : 0) +
+            (pressedKeys.contains(KeyEvent.KEYCODE_ALT_LEFT)
+                ? KeyEvent.META_ALT_LEFT_ON : 0)
+
+        ));
+
     if (resetModifiers) {
       conn.clearMetaKeyStates(
           KeyEvent.META_ALT_ON | KeyEvent.META_SHIFT_ON | KeyEvent.META_SYM_ON);
     }
   }
-  
+
+  private boolean shouldSend() {
+    if (pressedKeys.contains(KEY_CONTROL)) {
+      return true;
+    }
+    EditorInfo editorInfo = getCurrentInputEditorInfo();
+    if (editorInfo == null) {
+      return false;
+    }
+    return ((editorInfo.inputType & InputType.TYPE_TEXT_FLAG_MULTI_LINE) == 0);
+  }
+
   private void keyDel(InputConnection conn) {
+    // if control key used -- delete word right
+    if (pressedKeys.contains(KEY_CONTROL)) {
+      deleteWordRight(conn);
+      return;
+    }
+
     if (pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT)) {
       cut(conn);
       return;
@@ -301,22 +345,60 @@ public class WiFiInputMethod extends InputMethodService {
       // Potentially, text or text.text can be null
     }
   }
-  
+
   ExtractedTextRequest req = new ExtractedTextRequest();
   {
     req.hintMaxChars = 100000;
     req.hintMaxLines = 10000;
   }
-  
+
+  private void deleteWordRight(InputConnection conn) {
+    ExtractedText text = conn.getExtractedText(req, 0);
+    if (text == null) return;
+
+    int end = text.selectionEnd;
+    String str = text.text.toString();
+    int len = str.length();
+
+    for (; end < len; end++) {
+      if (!Character.isSpace(str.charAt(end))) break;
+    }
+    for (; end < len; end++) {
+      if (Character.isSpace(str.charAt(end))) break;
+    }
+
+    conn.deleteSurroundingText(0, end - text.selectionEnd);
+  }
+
+  private void deleteWordLeft(InputConnection conn) {
+    // TODO: what is the correct word deleting policy?
+    // delete until next space? until next different character type?
+    ExtractedText text = conn.getExtractedText(req, 0);
+    if (text == null) return;
+
+    int end = text.selectionEnd - 1;
+
+    String str = text.text.toString();
+
+    for (; end >= 0; end--) {
+      if (!Character.isSpace(str.charAt(end))) break;
+    }
+    for (; end >= 0; end--) {
+      if (Character.isSpace(str.charAt(end))) break;
+    }
+    end++;
+    conn.deleteSurroundingText(text.selectionEnd - end, 0);
+  }
+
   private void wordRight(InputConnection conn) {
     boolean shift = pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT);
     ExtractedText text = conn.getExtractedText(req, 0);
     if (text == null) return;
-    
+
     int end = text.selectionEnd;
     String str = text.text.toString();
     int len = str.length();
-    
+
     for (; end < len; end++) {
       if (!Character.isSpace(str.charAt(end))) break;
     }
@@ -327,16 +409,16 @@ public class WiFiInputMethod extends InputMethodService {
     Log.d("wifikeyboard", "start = " + start + " end = " + end);
     conn.setSelection(start, end);
   }
-  
+
   private void wordLeft(InputConnection conn) {
     boolean shift = pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT);
     ExtractedText text = conn.getExtractedText(req, 0);
     if (text == null) return;
-    
+
     int end = text.selectionEnd - 1;
-    
+
     String str = text.text.toString();
-    
+
     for (; end >= 0; end--) {
       if (!Character.isSpace(str.charAt(end))) break;
     }
@@ -359,7 +441,7 @@ public class WiFiInputMethod extends InputMethodService {
       end = text.text.length();
     } else {
       end = text.text.toString().indexOf('\n', text.selectionEnd);
-      if (end == -1) end = text.text.length(); 
+      if (end == -1) end = text.text.length();
     }
     int start = shift ? text.selectionStart : end;
     Log.d("wifikeyboard", "start = " + start + " end = " + end);
@@ -371,7 +453,7 @@ public class WiFiInputMethod extends InputMethodService {
     boolean shift = pressedKeys.contains(KeyEvent.KEYCODE_SHIFT_LEFT);
     ExtractedText text = conn.getExtractedText(req, 0);
     if (text == null) return;
-    
+
     int end;
     if (control) {
       end = 0;
@@ -398,7 +480,7 @@ public class WiFiInputMethod extends InputMethodService {
     conn.endBatchEdit();
     return true;
   }
-  
+
   String getText() {
     String text = "";
     try {
