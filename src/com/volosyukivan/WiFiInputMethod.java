@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.hardware.input.InputManager;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -35,6 +36,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputMethod;
 
 import com.volosyukivan.RemoteKeyListener.Stub;
 
@@ -47,6 +49,17 @@ public class WiFiInputMethod extends InputMethodService {
   @Override
   public void onStartInput(EditorInfo attribute, boolean restarting) {
     super.onStartInput(attribute, restarting);
+
+//    boolean multiline = (attribute.inputType & InputType.TYPE_TEXT_FLAG_MULTI_LINE) != 0;
+//    Log.d("ivan", "onStartInput "
+//       + "actionId=" + attribute.actionId + " "
+//       + "id=" + attribute.fieldId + " "
+//       + "name=" + attribute.fieldName + " "
+//       + "opt=" + Integer.toHexString(attribute.imeOptions) + " "
+//       + "inputType=" + Integer.toHexString(attribute.inputType) + " "
+//       + "priv=" + attribute.privateImeOptions
+//       + "multiline=" + multiline);
+
     try {
       String text = getText();
       remoteKeyboard.startTextEdit(text);
@@ -262,7 +275,7 @@ public class WiFiInputMethod extends InputMethodService {
     if (code == KeyEvent.KEYCODE_ENTER) {
       if (shouldSend()) {
         if (!down) return;
-        Log.d("wifikeyboard", "submit");
+        Log.d("ivan", "sending submit action");
         conn.performEditorAction(EditorInfo.IME_ACTION_SEND);
         return;
       }
@@ -301,13 +314,33 @@ public class WiFiInputMethod extends InputMethodService {
 
   private boolean shouldSend() {
     if (pressedKeys.contains(KEY_CONTROL)) {
+//      Log.d("ivan", "Control pressed");
       return true;
     }
     EditorInfo editorInfo = getCurrentInputEditorInfo();
     if (editorInfo == null) {
+//      Log.d("ivan", "No editor info");
       return false;
     }
-    return ((editorInfo.inputType & InputType.TYPE_TEXT_FLAG_MULTI_LINE) == 0);
+
+    if ((editorInfo.inputType & InputType.TYPE_CLASS_TEXT) == 0) {
+//      Log.d("ivan", "Not text, sending enter");
+      return false;
+    }
+
+
+    if ((editorInfo.inputType & InputType.TYPE_TEXT_FLAG_MULTI_LINE) != 0) {
+//      Log.d("ivan", "Multi-line, sending ordinary enter");
+      return false;
+    }
+
+    int action = editorInfo.imeOptions & EditorInfo.IME_MASK_ACTION;
+    if (action == EditorInfo.IME_ACTION_NONE || action == EditorInfo.IME_ACTION_DONE) {
+//      Log.d("ivan", "No useful action, sending enter");
+      return false;
+    }
+//    Log.d("ivan", "Useful action to be performed");
+    return true;
   }
 
   private void keyDel(InputConnection conn) {
