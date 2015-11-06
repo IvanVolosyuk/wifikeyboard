@@ -8,5 +8,8 @@ Use WiFi for low latency input. 3G may be blocked by some carriers. USB connecti
 Available on Play Store:
 https://play.google.com/store/apps/details?id=com.volosyukivan
 
+Available on F-Droid Store:
+https://f-droid.org/repository/browse/?fdid=com.volosyukivan
+
 There is also a related project in development which provides Windows/Mac native client implementation:
 https://github.com/dportabella/DesktopKeyboard2Android
