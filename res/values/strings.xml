@@ -30,7 +30,7 @@
 <string name="desc_connect_to_one">Connect your computer\'s browser to http://%1$s:%2$d</string>
 <string name="desc_connect_to_any">Connect your computer\'s browser to any of:</string>
 <string name="desc_warn">This will only work if you did previous steps and your phone is visible from your computer.</string>
-<string name="desc_alt_usb_cable">Alternatively you can use usb cable to connect to your computer</string>
+<string name="desc_alt_usb_cable">Alternatively you can use a USB cable to connect to your computer</string>
 <string name="desc_adb_from_sdk">You need \"adb\" command from Android SDK</string>
 <string name="desc_cmdline">Type \"adb forward tcp:%1$d tcp:%2$d\" in command line</string>
 <string name="desc_connect_local">And connect your computer\'s browser to http://localhost:%d</string>
@@ -43,7 +43,7 @@
 <string name="input_disabled_link_text">Visit help page.</string>
 <!-- ignore the line, I'll add the url myself -->
 <string name="input_disabled_link_url">http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings</string>
-<!-- Please preserve formating of wiki page, "!" sign before WiFiKeyboard disables automatic link creation from WiFiKeyboard because it is WikiWord -->
+<!-- Please preserve formatting of wiki page, "!" sign before WiFiKeyboard disables automatic link creation from WiFiKeyboard because it is WikiWord -->
 <string name="help_wiki_page">
 #summary Howto enable !WiFiKeyboard on device
 
@@ -56,7 +56,7 @@ To enable !WiFiKeyboard on your device:
      * Check the !WiFiKeyboard
   * Long-press on any text field and select \"Input method\" -> !WiFiKeyboard.
 </string>
-<string name="input_from_two_devices_title">Mutiple input</string>
+<string name="input_from_two_devices_title">Multiple input</string>
 <string name="input_from_two_devices_desc">Typing from multiple browser windows is not supported. Use one browser window.</string>
 <string name="connection_ok_title">Connected</string>
 <string name="connection_ok_desc">You can type now.</string>
@@ -77,5 +77,5 @@ To enable !WiFiKeyboard on your device:
 <string name="special_key_back_mapping">Escape = BACK</string>
 <string name="special_key_volume_mapping">F9, F10 = Volume control</string>
 <string name="footer_source_code">Source code available (license GPL v2).</string>
-<string name="footer_author">Created by Ivan Volosyuk on 2010.</string>
+<string name="footer_author">Created by Ivan Volosyuk in 2010.</string>
 </resources>
