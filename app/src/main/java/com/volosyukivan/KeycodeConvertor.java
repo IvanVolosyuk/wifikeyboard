@@ -73,6 +73,7 @@ public final class KeycodeConvertor {
       case 27: return KeyEvent.KEYCODE_BACK;
       case 116: return KeyEvent.KEYCODE_BACK;
       // Home
+      case 117: return KeyEvent.KEYCODE_HOME;
       case 113: return KeyEvent.KEYCODE_MENU;
       
       case 114: return KeyEvent.KEYCODE_SEARCH;

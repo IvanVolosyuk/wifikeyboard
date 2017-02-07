@@ -342,7 +342,14 @@ public class WiFiInputMethod extends InputMethodService {
 //      return;
 //    }
 
-    conn.sendKeyEvent(new KeyEvent(
+      //go Home
+      if(code==KeyEvent.KEYCODE_HOME){
+          Intent intent = new Intent(Intent.ACTION_MAIN);
+          intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+          intent.addCategory(Intent.CATEGORY_HOME);
+          startActivity(intent);
+      }
+      conn.sendKeyEvent(new KeyEvent(
         android.os.SystemClock.uptimeMillis(),
         android.os.SystemClock.uptimeMillis(),
         down ? KeyEvent.ACTION_DOWN : KeyEvent.ACTION_UP,
