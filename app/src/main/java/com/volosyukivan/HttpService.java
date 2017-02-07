@@ -36,6 +36,7 @@ import android.content.SharedPreferences.Editor;
 import android.net.wifi.WifiManager;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.support.v4.app.NotificationCompat;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
@@ -115,14 +116,23 @@ public class HttpService extends Service {
       addr = "Port: " + port;
     }
     String tickerText = addr + " - WiFiKeyboard";
-    Notification notification = new Notification(R.drawable.icon, ticker ? tickerText : null, when);
-    
+
     Context context = getApplicationContext();
     CharSequence contentTitle = "WiFi Keyboard";
     CharSequence contentText = addr;
     Intent notificationIntent = new Intent(this, WiFiKeyboard.class);
     PendingIntent contentIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
-    notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+//    setLatestEventInfo deprecated,
+//    Notification notification = new Notification(R.drawable.icon, ticker ? tickerText : null, when);
+//    notification.setLatestEventInfo(context, contentTitle, contentText, contentIntent);
+    Notification notification=new NotificationCompat.Builder(context)
+            .setSmallIcon(R.drawable.icon)
+            .setTicker(ticker?tickerText:null)
+            .setWhen(when)
+            .setContentIntent(contentIntent)
+            .setContentText(contentText)
+            .setContentTitle(contentTitle)
+            .build();
 //    startForeground(0, notification);
 //    setForeground(true);
     NotificationManager mgr =

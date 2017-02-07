@@ -1,2 +1,25 @@
-bin/
-gen/
+# General
+.DS_Store
+*~
+
+# Android Studio
+/.idea/
+/.gradle
+/local.properties
+/build
+/captures
+*.iml
+*.iws
+*.ipr
+*.swp
+
+# built application files
+*.apk
+*.ap_
+
+# files for the dex VM
+*.dex
+
+# Java class files
+*.class
+

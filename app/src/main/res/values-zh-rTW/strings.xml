@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="app_name">無線鍵盤</string>
+
+<string name="desc_setup_wifi">設定 無線鍵盤：</string>
+<string name="desc_goto_settings">轉到 設定-&gt;語言 &amp; 鍵盤</string>
+<string name="desc_enable_kbd">在清單中開啟 無線鍵盤</string>
+<string name="desc_toch_input_field">在任何的輸入方塊中點擊並按住保持一秒</string>
+<string name="desc_change_input_method">改變 \"輸入模式\" 為 \"無線鍵盤\"</string>
+<string name="desc_enable_network">確定你啟用了 WiFi 或 GPRS/3G 網路</string>
+<string name="desc_connect_to_one">連接你的電腦瀏覽器到 http://%1$s:%2$d</string>
+<string name="desc_connect_to_any">連接你的電腦瀏覽器到以下任何一個：</string>
+<string name="desc_warn">將只會在你按照之前的步驟做了之後並在你的電腦上看到你的手機之後可用。</string>
+<string name="desc_alt_usb_cable">或者，你也可以使用USB資料線連接到你的電腦。</string>
+<string name="desc_adb_from_sdk">你需要來自Android SDK中的 \"adb\"命令列工具</string>
+<string name="desc_cmdline">在命令列介面中輸入 \"adb forward tcp:%1$d tcp:%2$d\"</string>
+<string name="desc_connect_local">然後連接你的電腦瀏覽器到 http://localhost:%d</string>
+
+<string name="page_title">無線鍵盤</string>
+<string name="conn_problem_title">連接問題</string>
+<string name="conn_problem_desc">手機與電腦直接無連接。</string>
+<string name="input_disabled_title">未輸入</string>
+<string name="input_disabled_desc">在你的設備上開啟 無線鍵盤 輸入。</string>
+<string name="input_disabled_link_text">存取說明頁面。</string>
+<!-- ignore the line, I'll add the url myself -->
+<string name="input_disabled_link_url">http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings_zh_TW</string>
+<!-- Please preserve formating of wiki page, "!" sign before 無線鍵盤 disables automatic link creation from 無線鍵盤 because it is WikiWord -->
+<string name="help_wiki_page">
+#summary 如何在設備上啟用 !無線鍵盤
+
+= 如何在設備上啟用 !無線鍵盤 =
+
+在你的設備上啟用 !無線鍵盤：
+  * 在你的設備上找到輸入方式的設定然後啟用它：
+     * 在桌面上按Menu鍵
+     * 轉至：設定 -&gt; 語言和鍵盤
+     * 勾選 !無線鍵盤
+  * 在任何欄位上長按然後選取\"輸入方式\" -&gt; !無線鍵盤。
+</string>
+<string name="input_from_two_devices_title">多設備輸入</string>
+<string name="input_from_two_devices_desc">不支援從多個瀏覽器視窗中輸入。請僅適用一個瀏覽器視窗。</string>
+<string name="connection_ok_title">已連接</string>
+<string name="connection_ok_desc">你可以現在輸入。</string>
+<string name="connection_ok_latency">延遲為 %d 毫秒</string>
+<string name="input_field_title">Android 輸入：</string>
+<string name="input_field_message">將會把輸入的文字傳至Android設備上。</string>
+<string name="keyboard_mode_title">鍵盤模式：</string>
+<string name="keyboard_mode_text">國際鍵盤</string>
+<string name="keyboard_mode_keycodes">遊戲模式(僅辨識按鍵碼)</string>
+<string name="keyboard_connection_status_title">狀態：</string>
+<string name="keyboard_connection_status_initial_value">連接中...</string>
+<string name="special_keys_title">特殊鍵：</string>
+<string name="special_key_shift_mapping">Shift = Shift</string>
+<string name="special_key_alt_mapping">Alt = Alt</string>
+<string name="special_key_arrows_mapping">方向鍵 = 搖桿方向鍵</string>
+<string name="special_key_dpad_center_mapping">Insert 或 F1 = 搖桿中鍵</string>
+<string name="special_key_menu_mapping">F2 = Menu</string>
+<string name="special_key_back_mapping">Escape = 返回鍵</string>
+<string name="special_key_volume_mapping">F9, F10 = 音量控制</string>
+<string name="footer_source_code">源碼可用(基於GPL v2協議)。</string>
+<string name="footer_author">由 Ivan Volosyuk 於 2010 建立。&lt;br/&gt;安智網中文化（&lt;a href="http://goapk.com"&gt;http://goapk.com&lt;/a&gt;）</string>
+</resources>

@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/python2
 
 import xml.parsers.expat;
 import sys;
@@ -28,9 +28,9 @@ def parse(lang, values):
   p.EndElementHandler = end_element
   p.CharacterDataHandler = char_data
   if lang == 'en':
-    f=open('res/values/strings.xml');
+    f=open('app/src/main/res/values/strings.xml');
   else:
-    f=open('res/values-%s/strings.xml' % lang);
+    f=open('app/src/main/res/values-%s/strings.xml' % lang);
   p.ParseFile(f);
 
 def parse_R(file, values):
@@ -43,7 +43,7 @@ def parse_R(file, values):
     sys.exit(1)
 
 parse('en', values_en);
-parse_R('gen/com/volosyukivan/R.java', values_lang);
+parse_R('app/build/generated/source/r/debug/com/volosyukivan/R.java', values_lang);
 page=open('html/key.html').read();
 for num,(key,orig) in enumerate(
          sorted(values_en.iteritems(),
@@ -60,8 +60,8 @@ for key,repl in values_lang.iteritems():
   page = page.replace(orig, replacement);
 old = None
 try:
-  old = open("res/raw/key.html").read();
+  old = open("app/src/main/res/raw/key.html").read();
 except:
   pass
 if (old != page):
-  open("res/raw/key.html", "w").write(page.encode('UTF-8'));
+  open("app/src/main/res/raw/key.html", "w").write(page.encode('UTF-8'));
