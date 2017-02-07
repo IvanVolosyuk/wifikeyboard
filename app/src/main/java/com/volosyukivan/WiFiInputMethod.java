@@ -26,17 +26,24 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.hardware.input.InputManager;
 import android.inputmethodservice.InputMethodService;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.text.InputType;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethod;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import com.volosyukivan.RemoteKeyListener.Stub;
 
@@ -45,6 +52,49 @@ public class WiFiInputMethod extends InputMethodService {
   public static final int KEY_END = -1001;
   public static final int KEY_CONTROL = -1002;
   public static final int KEY_DEL = -1003;
+
+    @Override
+    public View onCreateInputView() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            final InputMethodManager imm = (InputMethodManager)
+                    getSystemService(Context.INPUT_METHOD_SERVICE);
+            final IBinder token=WiFiInputMethod.this.getWindow().getWindow().getAttributes().token;
+            ImageView language = new ImageView(this);
+            language.setImageResource(R.drawable.language);
+            language.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+                        if (imm.shouldOfferSwitchingToNextInputMethod(token))
+                        {
+                            imm.switchToNextInputMethod(token,false);
+                        }
+                    }else{
+                        imm.showInputMethodPicker();
+                    }
+                }
+            });
+            language.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    imm.showInputMethodPicker();
+                    return true;
+                }
+            });
+            LinearLayout layout = new LinearLayout(this);
+            layout.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    imm.hideSoftInputFromInputMethod(token,InputMethodManager.HIDE_NOT_ALWAYS);
+                    return true;
+                }
+            });
+            layout.addView(language);
+            return layout;
+        } else {
+            return super.onCreateInputView();
+        }
+    }
 
   @Override
   public void onStartInput(EditorInfo attribute, boolean restarting) {
