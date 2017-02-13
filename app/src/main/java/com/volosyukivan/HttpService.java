@@ -20,8 +20,11 @@ package com.volosyukivan;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 import java.nio.channels.ServerSocketChannel;
 import java.util.ArrayList;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import android.app.Notification;
 import android.app.NotificationManager;
@@ -223,13 +226,24 @@ public class HttpService extends Service {
     } catch (IOException e) {
       throw new RuntimeException("failed to load html page", e);
     }
-    while (true) {
-      int pos = page.indexOf("$");
-      if (pos == -1) break;
-      int res = Integer.parseInt(page.substring(pos + 1, pos + 9), 16);
-      page.replace(pos, pos + 9, getString(res));
+    String rVariable = "\\$\\(([^)]*)\\)";
+    Pattern pVariable = Pattern.compile(rVariable);
+    Matcher mVariable = pVariable.matcher(page.toString());
+    Class rStringClass = R.string.class;
+    StringBuffer sb = new StringBuffer();
+    while (mVariable.find()) {
+      try {
+        String variableName = mVariable.group(1);
+        Field field = rStringClass.getField(variableName);
+        int resId = (int) field.get(null);
+        String variableValue = getString(resId);
+        mVariable.appendReplacement(sb, variableValue);
+      } catch (Exception e) {
+        //do nothing,
+      }
     }
-    htmlpage = page.toString();
+    mVariable.appendTail(sb);
+    htmlpage = sb.toString();
     startServer(this);
   }
   

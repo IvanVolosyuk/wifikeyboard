@@ -284,21 +284,21 @@
       if (stat == null) return;
 
       if (newState == "connected") {
-        stat.innerHTML = "$7f060005";
+        stat.innerHTML = "$(connection_ok_title)";
         stat["color"] = "green";
-        xcomment.innerHTML = "$7f060003";
+        xcomment.innerHTML = "$(connection_ok_desc)";
       } else if (newState == "failure") {
-        stat.innerHTML = "$7f060002";
+        stat.innerHTML = "$(conn_problem_title)";
         stat["color"] = "red";
-        xcomment.innerHTML = "$7f060001";
+        xcomment.innerHTML = "$(conn_problem_desc)";
       } else if (newState == "problem") {
-        stat.innerHTML = "$7f06001a";
+        stat.innerHTML = "$(input_disabled_title)";
         stat["color"] = "red";
-        xcomment.innerHTML = '$7f060017 <a href="$7f060019">$7f060018</a>';
+        xcomment.innerHTML = '$(input_disabled_desc) <a href="$(input_disabled_link_url)">$(input_disabled_link_text)</a>';
       } else if (newState == "multi") {
-        stat.innerHTML = "$7f06001e";
+        stat.innerHTML = "$(input_from_two_devices_title)";
         stat["color"] = "red";
-        xcomment.innerHTML = "$7f06001d";
+        xcomment.innerHTML = "$(input_from_two_devices_desc)";
       }
     }
 
@@ -463,12 +463,12 @@
 <tr valign="top">
 <td class="main" width="450">
 <!-- Main Window -->
-<h1>$7f060024</h1>
+<h1>$(page_title)</h1>
   <table border="0"><tbody><tr><td cellspacing="50" cellpadding="50">
   <form name="f">
-  <h2>$7f060023</h2>
-  <div class="mode"><input type="radio" name="mode" value="i" checked>$7f060022</div>
-  <div class="mode"><input type="radio" name="mode" value="c">$7f060021</div>
+  <h2>$(keyboard_mode_title)</h2>
+  <div class="mode"><input type="radio" name="mode" value="i" checked>$(keyboard_mode_text)</div>
+  <div class="mode"><input type="radio" name="mode" value="c">$(keyboard_mode_keycodes)</div>
   </form>
   </td></tr></tbody></table>
 
@@ -478,17 +478,17 @@
   <table border="0"><tbody><tr><td cellspacing="50" cellpadding="50">
   <tr>
   <td>
-  <h2>$7f06002c</h2>
+  <h2>$(special_keys_title)</h2>
   <ul>
-  <li>$7f06002a</li>
-  <li>$7f060025</li>
-  <li>$7f060026</li>
-  <li>$7f060028</li>
-  <li>$7f060029</li>
+  <li>$(special_key_shift_mapping)</li>
+  <li>$(special_key_alt_mapping)</li>
+  <li>$(special_key_arrows_mapping)</li>
+  <li>$(special_key_dpad_center_mapping)</li>
+  <li>$(special_key_menu_mapping)</li>
   <li>F3 = Search</li>
   <li>Escape,F5 = BACK</li>
   <li>F6 = Home</li>
-  <li>$7f06002b</li>
+  <li>$(special_key_volume_mapping)</li>
   <li><font color="red">F4 = Edit locally/ submit (alpha)</font></li>
   </ul>
   </td></tr></tbody></table>
@@ -496,7 +496,7 @@
 <td align="right" width="200">
 <!-- Side bar -->
   <table border="1" cellpadding="20"><tbody><tr><td cellspacing="50" cellpadding="50">
-  <h2>$7f060020 <font color="black" id="status">$7f06001f</font></h2>
+  <h2>$(keyboard_connection_status_title) <font color="black" id="status">$(keyboard_connection_status_initial_value)</font></h2>
   <div id="comment"></div>
   </td></tr></tbody></table>
 
@@ -505,7 +505,7 @@
 </tr>
 <tr>
 <td colspan="3">
-  <h2>$7f06001c</h2>
+  <h2>$(input_field_title)</h2>
   <form method="post" action="/form">
       <input type="hidden" name="name" value="value">
       <textarea name="text" cols="100" rows="20" id="in"></textarea>
@@ -515,7 +515,7 @@
 </tr>
 <tr>
 <td colspan="3">
-  <div class="footer"><a href="http://code.google.com/p/wifikeyboard/">$7f060015</a><br>$7f060014</div>
+  <div class="footer"><a href="http://code.google.com/p/wifikeyboard/">$(footer_source_code)</a><br>$(footer_author)</div>
 <!-- <div id="keys">Debug: key presses:</div> -->
 <!-- <div id="debug">New event placeholder.</div> -->
 <td>
