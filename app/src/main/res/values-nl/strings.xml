@@ -59,4 +59,5 @@ Om !WiFiKeyboard te activeren op uw toestel::
 <string name="special_key_volume_mapping">F9, F10 = Volume knoppen</string>
 <string name="footer_source_code">Bron code si beschikbaar (licentie GPL v2).</string>
 <string name="footer_author">Gecreëerd door Ivan Volosyuk in 2010.</string>
+    <string name="desc_toch_input_field_honeycomb">De keuze van een tekst, gezien de input voor de regio \'s - Kennisgeving</string>
 </resources>

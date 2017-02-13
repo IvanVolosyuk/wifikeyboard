@@ -77,4 +77,5 @@ Para activar !WiFiKeyboard en tu dispositivo:
 <string name="special_key_volume_mapping">F9, F10 = Control de volumen</string>
 <string name="footer_source_code">Código fuente disponible (licencia GPL v2).</string>
 <string name="footer_author">Creado por Ivan Volosyuk en 2010.</string>
+    <string name="desc_toch_input_field_honeycomb">Seleccione cualquier campo de entrada de texto, eche un vistazo en el área de notificación para el selector de método de entrada</string>
 </resources>

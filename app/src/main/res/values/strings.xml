@@ -24,6 +24,7 @@
 <string name="desc_goto_settings">Go to Settings->Language &amp; Keyboard</string>
 <string name="desc_enable_kbd">Enable WiFiKeyboard in the list</string>
 <string name="desc_toch_input_field">On any text input touch and hold for a second</string>
+    <!--TODO 下面这个之前没翻译，简单使用google translate，-->
 <string name="desc_toch_input_field_honeycomb">Select any text input field, take a look in notification area for the input method selector</string>
 <string name="desc_change_input_method">Change \"InputMethod\" to \"WiFiKeyboard\"</string>
 <string name="desc_enable_network">Ensure you have enabled WiFi or GPRS/3G network</string>

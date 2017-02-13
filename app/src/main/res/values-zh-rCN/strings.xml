@@ -59,4 +59,5 @@
 <string name="special_key_volume_mapping">F9, F10 = 音量控制</string>
 <string name="footer_source_code">源码可用(基于GPL v2协议)。</string>
 <string name="footer_author">由 Ivan Volosyuk 于 2010 创建。&lt;br/&gt;安智网汉化（&lt;a href="http://goapk.com"&gt;http://goapk.com&lt;/a&gt;）</string>
+    <string name="desc_toch_input_field_honeycomb">选择任何输入框，在通知栏中查看输入法选择器</string>
 </resources>

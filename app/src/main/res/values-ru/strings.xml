@@ -59,4 +59,5 @@
 <string name="special_key_volume_mapping">F9, F10 = Управление громкостью</string>
 <string name="footer_source_code">Доступен исходный код (лицензия GPL v2).</string>
 <string name="footer_author">Разработка Ивана Волосюка, 2010 год</string>
+    <string name="desc_toch_input_field_honeycomb">Выберите любое поле ввода текста, посмотрите в области уведомлений для выбора метода ввода</string>
 </resources>

@@ -59,4 +59,5 @@ För att aktivera !WiFiKeyboard på din enhet:
 <string name="special_key_volume_mapping">F9, F10 = Volymkontroll</string>
 <string name="footer_source_code">Källkod tillgänglig (licens GPL v2).</string>
 <string name="footer_author">Skapad av Ivan Volosyuk 2010.</string>
+    <string name="desc_toch_input_field_honeycomb">Välj ett textinmatningsfält , ta en titt i meddelandefältet för inmatningsmetod väljare</string>
 </resources>

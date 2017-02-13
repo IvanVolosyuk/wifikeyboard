@@ -59,4 +59,5 @@ Per abilitare !WiFiKeyboard sul tuo telefono:
 <string name="special_key_volume_mapping">F9, F10 = Controllo voloume</string>
 <string name="footer_source_code">Codice sorgente disponibile (licenza GPL v2).</string>
 <string name="footer_author">Creato da Ivan Volosyuk nel 2010.</string>
+    <string name="desc_toch_input_field_honeycomb">Selezionare qualsiasi campo di inserimento testo, date un\'occhiata nell\'area di notifica per il selettore metodo di input</string>
 </resources>

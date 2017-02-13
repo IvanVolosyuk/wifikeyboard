@@ -1,5 +1,7 @@
 #!/usr/bin/python2
+#coding=utf-8
 
+#TODO 用python处理感觉有点蠢，明明可以用java处理的，
 import xml.parsers.expat;
 import sys;
 import re;
