@@ -18,8 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-      package="com.volosyukivan"
-      android:versionName="3.0.0" android:versionCode="40">
+      package="com.volosyukivan">
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.READ_PHONE_STATE"/>

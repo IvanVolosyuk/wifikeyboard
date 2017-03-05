@@ -21,6 +21,8 @@ android {
         applicationId "com.volosyukivan"
         minSdkVersion 9
         targetSdkVersion 25
+        versionCode 40
+        versionName "3.0.0"
     }
 
     buildTypes {
@@ -28,6 +30,13 @@ android {
             minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
             signingConfig signingConfigs.config
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    output.outputFile = new File(output.outputFile.parent,
+                            "${project.rootProject.name}-${variant.versionName}.apk"
+                    )
+                }
+            }
         }
     }
 }
