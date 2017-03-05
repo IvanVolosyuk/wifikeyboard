@@ -21,9 +21,8 @@
 <!-- for the Search Manager.
         android:settingsActivity="com.google.android.RussianKeyboard.Settings"
  -->
- 
+
 <input-method xmlns:android="http://schemas.android.com/apk/res/android"
-        android:isDefault="true"
-        android:supportsSwitchingToNextInputMethod="true">
+    android:isDefault="true">
     <subtype android:imeSubtypeMode="keyboard" />
 </input-method>
