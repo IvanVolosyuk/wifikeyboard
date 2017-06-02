@@ -1,0 +1,46 @@
+apply plugin: 'com.android.application'
+def keystorePropertiesFile = project.file("keystore.properties")
+def keystoreProperties = new Properties()
+keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+android {
+    lintOptions {
+        abortOnError false
+    }
+    signingConfigs {
+        config {
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+        }
+    }
+    compileSdkVersion 25
+    buildToolsVersion "25.0.2"
+
+    defaultConfig {
+        applicationId "com.volosyukivan"
+        minSdkVersion 9
+        targetSdkVersion 25
+        versionCode 41
+        versionName "3.0.1"
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
+            signingConfig signingConfigs.config
+            applicationVariants.all { variant ->
+                variant.outputs.each { output ->
+                    output.outputFile = new File(output.outputFile.parent,
+                            "${project.rootProject.name}-${variant.versionName}.apk"
+                    )
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    compile 'com.android.support:support-v4:25.2.0'
+}
