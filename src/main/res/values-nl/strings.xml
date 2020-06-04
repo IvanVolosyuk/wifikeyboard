@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="app_name">WiFiKeyboard</string>
+
+<string name="desc_setup_wifi">WiFiKeyboard instellen:</string>
+<string name="desc_goto_settings">Ga naar Instellingen->Taal &amp; toetsenbord</string>
+<string name="desc_enable_kbd">Activeer WiFiKeyboard in de lijst</string>
+<string name="desc_toch_input_field">Voer een lange druk uit op een tekst invoer veld</string>
+<string name="desc_change_input_method">Verander de \"Invoermethode\" naar \"WiFiKeyboard\"</string>
+<string name="desc_enable_network">Verzeker u ervan dat WiFi of GPRS/3G geactiveerd is</string>
+<string name="desc_connect_to_one">Ga met de browser op uw computer naar http://%1$s:%2$d</string>
+<string name="desc_connect_to_any">Ga met de browser op uw computer naar een van de volgende:</string>
+<string name="desc_warn">Dit zal alleen werken als u al de vorige stappen deed en uw telefoon verbonden is met uw computer.</string>
+<string name="desc_alt_usb_cable">Als alternatief kan u uw usb kabel gebruiken om een verbinding te maken met de computer</string>
+<string name="desc_adb_from_sdk">U heeft het \"adb\" commando van de Android SDK nodig</string>
+<string name="desc_cmdline">Voer \"adb forward tcp:%1$d tcp:%2$d\" in op de command line</string>
+<string name="desc_connect_local">En ga met de browser op uw computer naar http://localhost:%d</string>
+
+<string name="page_title">WiFi&amp;nbsp;Toetsenbord</string>
+<string name="conn_problem_title">Verbindings probleem</string>
+<string name="conn_problem_desc">Er is geen verbinding tussen Ga met de browser op uw computer naar en de computer.</string>
+<string name="input_disabled_title">Niet typen</string>
+<string name="input_disabled_desc">Activeer WiFiKeyboard invoer op uw toestel.</string>
+<string name="input_disabled_link_text">Bezoek de help pagina.</string>
+<!-- ignore the line, I'll add the url myself -->
+<string name="input_disabled_link_url">http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings_nl</string>
+<!-- Please preserve formating of wiki page, "!" sign before WiFiKeyboard disables automatic link creation from WiFiKeyboard because it is WikiWord -->
+<string name="help_wiki_page">
+#summary Hoe !WiFiKeyboard activeren op uw toestel
+
+= Hoe !WiFiKeyboard activeren op uw toestel =
+
+Om !WiFiKeyboard te activeren op uw toestel::
+  * Open Invoermethode instellingen op uw toestel en activeer het:
+     * Druk Menu op het Thuis scherm
+     * Navigeer naar: Instellingen -> Taal &amp; toetsenbord
+     * Vink !WiFiKeyboard aan
+  * Lange-druk op eender welk tekst veld en selecteer \"Invoermethode\" -> !WiFiKeyboard.
+</string>
+<string name="input_from_two_devices_title">Meervoudige invoer</string>
+<string name="input_from_two_devices_desc">Typen vanuit meerdere browsers wordt niet ondersteund. Gebruik één browser venster.</string>
+<string name="connection_ok_title">Verbonden</string>
+<string name="connection_ok_desc">U kan nu typen.</string>
+<string name="connection_ok_latency">Latency is %d ms</string>
+<string name="input_field_title">Android invoer (typ of plak hier):</string>
+<string name="input_field_message">Tekst die hier ingegeven wordt gaat naar het Android toestel.</string>
+<string name="keyboard_mode_title">Toetsenbord modus:</string>
+<string name="keyboard_mode_text">Internationaal toetsenbord</string>
+<string name="keyboard_mode_keycodes">Game modus (enkel key codes)</string>
+<string name="keyboard_connection_status_title">Status:</string>
+<string name="keyboard_connection_status_initial_value">Bezig met verbinden...</string>
+<string name="special_keys_title">Speciale knoppen:</string>
+<string name="special_key_shift_mapping">Shift = Shift</string>
+<string name="special_key_alt_mapping">Alt = Alt</string>
+<string name="special_key_arrows_mapping">Pijlen = DPAD pijlen</string>
+<string name="special_key_dpad_center_mapping">Insert of F1 = Centrale DPAD knop</string>
+<string name="special_key_menu_mapping">F2 = Menu</string>
+<string name="special_key_back_mapping">Escape = BACK</string>
+<string name="special_key_volume_mapping">F9, F10 = Volume knoppen</string>
+<string name="footer_source_code">Bron code si beschikbaar (licentie GPL v2).</string>
+<string name="footer_author">Gecreëerd door Ivan Volosyuk in 2010.</string>
+</resources>

@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+ * WiFi Keyboard - Remote Keyboard for Android.
+ * Copyright (C) 2011 Ivan Volosyuk
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ -->
+<resources>
+<string name="app_name">WiFiKeyboard</string>
+
+<string name="desc_setup_wifi">Configurar WiFiKeyboard:</string>
+<string name="desc_goto_settings">Ir a Ajustes->Idioma y teclado</string>
+<string name="desc_enable_kbd">Activa WiFiKeyboard en la lista</string>
+<string name="desc_toch_input_field">En cualquier campo de texto, mantén pulsado durante unos segundos</string>
+<string name="desc_change_input_method">Cambia la \"Entrada de texto\" a \"WiFiKeyboard\"</string>
+<string name="desc_enable_network">Comprueba que tienes activada la WiFi o la red GPRS/3G</string>
+<string name="desc_connect_to_one">En el navegador de tu ordenador, dirígete a http://%1$s:%2$d</string>
+<string name="desc_connect_to_any">En el navegador de tu ordenador, dirígete a cualquiera de las siguientes direcciones:</string>
+<string name="desc_warn">Esto sólo funcionará si has completado los pasos anteriores y tu teléfono es visible desde tu ordenador.</string>
+<string name="desc_alt_usb_cable">Alternativamente, puedes utilizar un cable USB para conectar a tu ordenador</string>
+<string name="desc_adb_from_sdk">Necesitas el comando \"adb\" del Android SDK</string>
+<string name="desc_cmdline">Escribe \"adb forward tcp:%1$d tcp:%2$d\" en consola</string>
+<string name="desc_connect_local">En el navegador de tu ordenador, dirígete a http://localhost:%d</string>
+
+<string name="page_title">WiFi&amp;nbsp;Keyboard</string>
+<string name="conn_problem_title">Problema al conexión</string>
+<string name="conn_problem_desc">No hay conexión entre el teléfono y el ordenador.</string>
+<string name="input_disabled_title">No escribiendo</string>
+<string name="input_disabled_desc">Activa la entrada WiFiKeyboard en tu dispositivo.</string>
+<string name="input_disabled_link_text">Ver la página de ayuda.</string>
+<!-- ignore the line, I'll add the url myself -->
+<string name="input_disabled_link_url">http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings</string>
+<!-- Please preserve formating of wiki page, "!" sign before WiFiKeyboard disables automatic link creation from WiFiKeyboard because it is WikiWord -->
+<string name="help_wiki_page">
+#summary Cómo activar !WiFiKeyboard en el dispositivo
+
+= Cómo activar !WiFiKeyboard en el dispositivo =
+
+Para activar !WiFiKeyboard en tu dispositivo:
+  * Encuentra las opciones de entrada en tu dispositivo y actívalo:
+     * En la pantalla principal, pulsa el botón Menú
+     * Ve a Ajustes -> Idioma y teclado
+     * Marca la casilla de !WiFiKeyboard
+     * En cualquier campo de texto, mantén el dedo pulsado y, en el diálogo que aparece, pulsa en \"Entrada de texto\" -> !WiFiKeyboard.
+</string>
+<string name="input_from_two_devices_title">Entrada múltiple</string>
+<string name="input_from_two_devices_desc">Escribir desde varias ventanas del navegador no está soportado. Utiliza sólo una ventana.</string>
+<string name="connection_ok_title">Conectado</string>
+<string name="connection_ok_desc">Ahora puedes escribir.</string>
+<string name="connection_ok_latency">La latencia es de %d ms</string>
+<string name="input_field_title">Entrada de Android (escribe o pega texto aquí):</string>
+<string name="input_field_message">El texto escrito aquí va al dispositivo Android.</string>
+<string name="keyboard_mode_title">Modo de teclado:</string>
+<string name="keyboard_mode_text">Teclado internacional</string>
+<string name="keyboard_mode_keycodes">Modo de juego (sólo códigos de tecla)</string>
+<string name="keyboard_connection_status_title">Estado:</string>
+<string name="keyboard_connection_status_initial_value">Conectando...</string>
+<string name="special_keys_title">Teclas especiales:</string>
+<string name="special_key_shift_mapping">Mayúsculas = Mayúsculas</string>
+<string name="special_key_alt_mapping">Alt = Alt</string>
+<string name="special_key_arrows_mapping">Flechas = Pad direccional</string>
+<string name="special_key_dpad_center_mapping">Insert o F1 = Botón central del pad direccional</string>
+<string name="special_key_menu_mapping">F2 = Menú</string>
+<string name="special_key_back_mapping">Escape = Atrás/volver</string>
+<string name="special_key_volume_mapping">F9, F10 = Control de volumen</string>
+<string name="footer_source_code">Código fuente disponible (licencia GPL v2).</string>
+<string name="footer_author">Creado por Ivan Volosyuk en 2010.</string>
+</resources>

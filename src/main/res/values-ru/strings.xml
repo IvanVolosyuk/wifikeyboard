@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="app_name">WiFi Клавиатура</string>
+
+<string name="desc_setup_wifi">Установка WiFi Клавиатуры:</string>
+<string name="desc_goto_settings">Зайдите в \"Настройки\" телефона -> \"Язык и клавиатура\"</string>
+<string name="desc_enable_kbd">Включите WiFi Клавиатуру в списке доступных клавиатур</string>
+<string name="desc_toch_input_field">Нажмите и удерживайте палец на любом поле ввода текста.</string>
+<string name="desc_change_input_method">Измените \"Способ ввода\" на \"WiFi Клавиатуру\"</string>
+<string name="desc_enable_network">Проверьте что включен WiFi или GPRS/3G</string>
+<string name="desc_connect_to_one">На компьютере откройте веб страницу с адресом: http://%1$s:%2$d</string>
+<string name="desc_connect_to_any">На компьютере откройте веб страницу с любым из адресов:</string>
+<string name="desc_warn">Клавиатура будет работать если вы выполните все эти шаги.</string>
+<string name="desc_alt_usb_cable">В качестве альтернативного варианта можно использовать соединение через USB:</string>
+<string name="desc_adb_from_sdk">Вам понадобится программа \"adb\" из Android SDK</string>
+<string name="desc_cmdline">Выполните команду \"adb forward tcp:%1$d tcp:%2$d\" на вашем компьютере.</string>
+<string name="desc_connect_local">И откройте веб страницу по адресу: http://localhost:%d</string>
+
+<string name="page_title">WiFi&amp;nbsp;Клавиатура</string>
+<string name="conn_problem_title">Нет связи</string>
+<string name="conn_problem_desc">Отсутствует соединение между телефоном и компьютером.</string>
+<string name="input_disabled_title">Печать выключена</string>
+<string name="input_disabled_desc">Включите WiFi клавиатуру в настройках вашего устройства.</string>
+<string name="input_disabled_link_text">Описание настройки.</string>
+<!-- ignore the line, I'll add the url myself -->
+<string name="input_disabled_link_url">http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings_ru</string>
+<!-- Please preserve formating of wiki page, "!" sign before WiFiKeyboard disables automatic link creation from WiFiKeyboard because it is WikiWord -->
+<string name="help_wiki_page">
+#summary Как включить WiFi клавиатуру на телефоне
+
+= Как включить !WiFi Клавиатуру на телефоне =
+
+Чтобы включить !WiFi Клавиатуру на вашем телефоне:
+  * Найдите настройку способов ввода на вашем телефоне и включите там !WiFi Клавиатуру:
+     * Находясь на основном экране (Home) нажмите кнопку Menu
+     * Выберите "Настройки", затем "Язык и клавиатура"
+     * Включите !WiFi Клавиатуру
+  * Нажмите и удерживайте палец на любом поле ввода, в контекстном меню выберите "Способ ввода", а в нем !WiFi Клавиатуру.
+</string>
+<string name="input_from_two_devices_title">Другой браузер</string>
+<string name="input_from_two_devices_desc">Ввод одновременно из двух окон интернет браузера не поддерживается. Используйте только одно окно.</string>
+<string name="connection_ok_title">Подключено</string>
+<string name="connection_ok_desc">Можно печатать.</string>
+<string name="connection_ok_latency">Задержка: %d мс</string>
+<string name="input_field_title">Поле ввода (для печати и вставки текста):</string>
+<string name="input_field_message">Этот текст отправляется на устройство.</string>
+<string name="keyboard_mode_title">Режим клавиатуры:</string>
+<string name="keyboard_mode_text">Ввод текста</string>
+<string name="keyboard_mode_keycodes">Режим для игр (только коды клавиш)</string>
+<string name="keyboard_connection_status_title">Состояние:</string>
+<string name="keyboard_connection_status_initial_value">Соединение...</string>
+<string name="special_keys_title">Специальные клавиши:</string>
+<string name="special_key_shift_mapping">Shift = Shift</string>
+<string name="special_key_alt_mapping">Alt = Alt</string>
+<string name="special_key_arrows_mapping">Стрелки = Стрелки телефона</string>
+<string name="special_key_dpad_center_mapping">Insert или F1 = Средняя кнопка</string>
+<string name="special_key_menu_mapping">F2 = Menu</string>
+<string name="special_key_back_mapping">Escape = Назад(BACK)</string>
+<string name="special_key_volume_mapping">F9, F10 = Управление громкостью</string>
+<string name="footer_source_code">Доступен исходный код (лицензия GPL v2).</string>
+<string name="footer_author">Разработка Ивана Волосюка, 2010 год</string>
+</resources>

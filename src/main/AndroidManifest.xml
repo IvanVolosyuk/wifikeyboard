@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+ * WiFi Keyboard - Remote Keyboard for Android.
+ * Copyright (C) 2011 Ivan Volosyuk
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ -->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.volosyukivan"
+      android:versionName="2.3.5" android:versionCode="30">
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:resizeable="true"
+        android:smallScreens="true"
+        android:xlargeScreens="true" />
+    
+    <application android:icon="@drawable/icon"
+                 android:label="@string/app_name">
+        <activity android:name=".WiFiKeyboard"
+                  android:label="@string/app_name"
+                  android:clearTaskOnLaunch="true"
+                  android:noHistory="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity android:name=".WidgetActivity"
+                  android:label="@string/app_name"
+                  android:theme="@android:style/Theme.NoDisplay"
+                  android:excludeFromRecents="true"
+                  android:noHistory="true">
+                  <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                </intent-filter>
+        </activity>
+        <activity android:name=".WidgetConfigure"
+                  android:theme="@android:style/Theme.Dialog"
+                  android:label="Widget configuration">
+          <intent-filter>
+            <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+          </intent-filter>
+        </activity>
+        
+        <!-- Declares the input method service -->
+        <service android:name="WiFiInputMethod"
+            android:label="WiFiKeyboard"
+            android:permission="android.permission.BIND_INPUT_METHOD">
+            <intent-filter>
+                <action android:name="android.view.InputMethod" />
+            </intent-filter>
+            <meta-data android:name="android.view.im" android:resource="@xml/method" />
+        </service>
+        <service android:name="HttpService"/>
+        
+        <receiver android:name=".WidgetProvider" android:label="WiFiKeyboard">
+          <intent-filter>
+	           <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+          </intent-filter>
+          <meta-data android:name="android.appwidget.provider"
+                     android:resource="@xml/widget" />
+        </receiver>
+        
+    </application>
+</manifest> 

@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="app_name">WiFiKeyboard</string>
+
+<string name="desc_setup_wifi">Configurazione di WiFiKeyboard:</string>
+<string name="desc_goto_settings">Vai su Impostazioni->Lingua e tastiera</string>
+<string name="desc_enable_kbd">Abilita WiFiKeyboard nella lista</string>
+<string name="desc_toch_input_field">Su qualsiasi casella di testo tieni premuto per un secondo</string>
+<string name="desc_change_input_method">Cambia \"Metodo inserimento\" in \"WiFiKeyboard\"</string>
+<string name="desc_enable_network">Assicurati che la connessione WiFi o GPRS/3G sia attiva</string>
+<string name="desc_connect_to_one">Connetti il browser del tuo computer a http://%1$s:%2$d</string>
+<string name="desc_connect_to_any">Connetti il browser del tuo computer a qualsiasi di:</string>
+<string name="desc_warn">Funziona solo se hai eseguito i passaggi precedenti e se il tuo telefono è visibile dal tuo computer.</string>
+<string name="desc_alt_usb_cable">In alternativa puoi usare un cavo usb per connetterti al tuo computer</string>
+<string name="desc_adb_from_sdk">Hai bisogno del comando \"adb\" di Android SDK</string>
+<string name="desc_cmdline">Digita \"adb forward tcp:%1$d tcp:%2$d\" nella linea di comando</string>
+<string name="desc_connect_local">E connetti il browser del tuo computer a http://localhost:%d</string>
+
+<string name="page_title">WiFi&amp;nbsp;Keyboard</string>
+<string name="conn_problem_title">Problema di connessione</string>
+<string name="conn_problem_desc">Nessuna connessione tra telefono e computer</string>
+<string name="input_disabled_title">Non stai scrivendo</string>
+<string name="input_disabled_desc">Abilita WiFiKeyboard come metodo inserimento sul tuo telefono.</string>
+<string name="input_disabled_link_text">Visita la pagina di aiuto.</string>
+<!-- ignore the line, I'll add the url myself -->
+<string name="input_disabled_link_url">http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings</string>
+<!-- Please preserve formating of wiki page, "!" sign before WiFiKeyboard disables automatic link creation from WiFiKeyboard because it is WikiWord -->
+<string name="help_wiki_page">
+#summary Come abilitare !WiFiKeyboard sul telefono
+
+= Come abilitare !WiFiKeyboard sul telefono =
+
+Per abilitare !WiFiKeyboard sul tuo telefono:
+  * Sul telefono, cerca le impostazioni sul metodo di inserimento e abilitala:
+     * Sulla schermata Home premi Menu
+     * Vai su: Impostazioni -> Lingua e tastiera
+     * Seleziona !WiFiKeyboard
+  * Tieni premuto su qualsiasi casella di testo e seleziona \"Metodo inserimento\" -> !WiFiKeyboard.
+</string>
+<string name="input_from_two_devices_title">Inserimento multiplo</string>
+<string name="input_from_two_devices_desc">La scrittura da finestre multiple del browser non è supportata. Usa una sola finestra del browser.</string>
+<string name="connection_ok_title">Connesso</string>
+<string name="connection_ok_desc">Ora puoi scrivere.</string>
+<string name="connection_ok_latency">La latenza è di %d ms</string>
+<string name="input_field_title">Input Android (scrivi o incolla qui):</string>
+<string name="input_field_message">Il testo digitato qui è inviato al dispositivo android.</string>
+<string name="keyboard_mode_title">Modalità tastiera:</string>
+<string name="keyboard_mode_text">Tastiera internazionale</string>
+<string name="keyboard_mode_keycodes">Modalità gioco (solo codici chiave)</string>
+<string name="keyboard_connection_status_title">Stato:</string>
+<string name="keyboard_connection_status_initial_value">Mi sto connettendo...</string>
+<string name="special_keys_title">Tasti speciali:</string>
+<string name="special_key_shift_mapping">Shift = Shift</string>
+<string name="special_key_alt_mapping">Alt = Alt</string>
+<string name="special_key_arrows_mapping">Frecce = Frecce DPAD </string>
+<string name="special_key_dpad_center_mapping">Insert o F1 = Centrale DPAD </string>
+<string name="special_key_menu_mapping">F2 = Menu</string>
+<string name="special_key_back_mapping">Escape = BACK</string>
+<string name="special_key_volume_mapping">F9, F10 = Controllo voloume</string>
+<string name="footer_source_code">Codice sorgente disponibile (licenza GPL v2).</string>
+<string name="footer_author">Creato da Ivan Volosyuk nel 2010.</string>
+</resources>

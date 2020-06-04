@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 
+ * WiFi Keyboard - Remote Keyboard for Android.
+ * Copyright (C) 2011 Ivan Volosyuk
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ -->
+<resources>
+<string name="app_name">WiFiKeyboard</string>
+
+<string name="desc_setup_wifi">Setting up WiFiKeyboard:</string>
+<string name="desc_goto_settings">Go to Settings->Language &amp; Keyboard</string>
+<string name="desc_enable_kbd">Enable WiFiKeyboard in the list</string>
+<string name="desc_toch_input_field">On any text input touch and hold for a second</string>
+<string name="desc_toch_input_field_honeycomb">Select any text input field, take a look in notification area for the input method selector</string>
+<string name="desc_change_input_method">Change \"InputMethod\" to \"WiFiKeyboard\"</string>
+<string name="desc_enable_network">Ensure you have enabled WiFi or GPRS/3G network</string>
+<string name="desc_connect_to_one">Connect your computer\'s browser to http://%1$s:%2$d</string>
+<string name="desc_connect_to_any">Connect your computer\'s browser to any of:</string>
+<string name="desc_warn">This will only work if you did previous steps and your phone is visible from your computer.</string>
+<string name="desc_alt_usb_cable">Alternatively you can use usb cable to connect to your computer</string>
+<string name="desc_adb_from_sdk">You need \"adb\" command from Android SDK</string>
+<string name="desc_cmdline">Type \"adb forward tcp:%1$d tcp:%2$d\" in command line</string>
+<string name="desc_connect_local">And connect your computer\'s browser to http://localhost:%d</string>
+
+<string name="page_title">WiFi&amp;nbsp;Keyboard</string>
+<string name="conn_problem_title">Connection problem</string>
+<string name="conn_problem_desc">No connection between the phone and computer.</string>
+<string name="input_disabled_title">Not typing</string>
+<string name="input_disabled_desc">Enable WiFiKeyboard input on you device.</string>
+<string name="input_disabled_link_text">Visit help page.</string>
+<!-- ignore the line, I'll add the url myself -->
+<string name="input_disabled_link_url">http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings</string>
+<!-- Please preserve formating of wiki page, "!" sign before WiFiKeyboard disables automatic link creation from WiFiKeyboard because it is WikiWord -->
+<string name="help_wiki_page">
+#summary Howto enable !WiFiKeyboard on device
+
+= Howto enable !WiFiKeyboard on device =
+
+To enable !WiFiKeyboard on your device:
+  * Find Input methods settings on your device and enable it:
+     * On Home screen press Menu
+     * Navigate to: Settings -> Language and Keyboard
+     * Check the !WiFiKeyboard
+  * Long-press on any text field and select \"Input method\" -> !WiFiKeyboard.
+</string>
+<string name="input_from_two_devices_title">Mutiple input</string>
+<string name="input_from_two_devices_desc">Typing from multiple browser windows is not supported. Use one browser window.</string>
+<string name="connection_ok_title">Connected</string>
+<string name="connection_ok_desc">You can type now.</string>
+<string name="connection_ok_latency">Latency is %d ms</string>
+<string name="input_field_title">Android input (type or paste here):</string>
+<string name="input_field_message">Text typed here goes to android device.</string>
+<string name="keyboard_mode_title">Keyboard mode:</string>
+<string name="keyboard_mode_text">International keyboard</string>
+<string name="keyboard_mode_keycodes">Game mode (key codes only)</string>
+<string name="keyboard_connection_status_title">Status:</string>
+<string name="keyboard_connection_status_initial_value">Connecting...</string>
+<string name="special_keys_title">Special keys:</string>
+<string name="special_key_shift_mapping">Shift = Shift</string>
+<string name="special_key_alt_mapping">Alt = Alt</string>
+<string name="special_key_arrows_mapping">Arrows = DPAD Arrows</string>
+<string name="special_key_dpad_center_mapping">Insert or F1 = DPAD Center</string>
+<string name="special_key_menu_mapping">F2 = Menu</string>
+<string name="special_key_back_mapping">Escape = BACK</string>
+<string name="special_key_volume_mapping">F9, F10 = Volume control</string>
+<string name="footer_source_code">Source code available (license GPL v2).</string>
+<string name="footer_author">Created by Ivan Volosyuk on 2010.</string>
+</resources>

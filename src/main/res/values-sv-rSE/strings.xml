@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<string name="app_name">WiFiKeyboard</string>
+
+<string name="desc_setup_wifi">Att aktivera WiFiKeyboard:</string>
+<string name="desc_goto_settings">Gå till Inställningar -> Nationella inställningar &amp; text</string>
+<string name="desc_enable_kbd">Aktivera WiFiKeyboard i listan</string>
+<string name="desc_toch_input_field">Tryck och håll på valfri textruta i en sekund</string>
+<string name="desc_change_input_method">Ändra \"Inmatningsmetod\" till \"WiFiKeyboard\"</string>
+<string name="desc_enable_network">Försäkra dig om att du har aktiverat WiFi eller GPRS/3G</string>
+<string name="desc_connect_to_one">Gå till http://%1$s:%2$d i din dators webbläsare</string>
+<string name="desc_connect_to_any">Gå till någon av dessa med din dators webbläsare:</string>
+<string name="desc_warn">Detta kommer bara att fungera om du gjorde föregående steg och din telefon är synlig från din dator.</string>
+<string name="desc_alt_usb_cable">Alternativt kan du använda en USB-kabel för att ansluta till din dator</string>
+<string name="desc_adb_from_sdk">Du behöver \"adb\" från Android SDK</string>
+<string name="desc_cmdline">Skriv in \"adb forward tcp:%1$d tcp:%2$d\" i kommandoraden på datorn</string>
+<string name="desc_connect_local">Och gå till http://localhost:%d i din dators webbläsare</string>
+
+<string name="page_title">WiFi&amp;nbsp;Keyboard</string>
+<string name="conn_problem_title">Anslutningsproblem</string>
+<string name="conn_problem_desc">Ingen koppling mellan telefonen och datorn.</string>
+<string name="input_disabled_title">Skriver inte</string>
+<string name="input_disabled_desc">Aktivera WiFiKeyboard på din enhet.</string>
+<string name="input_disabled_link_text">Besök hjälpsidan.</string>
+<!-- ignore the line, I'll add the url myself -->
+<string name="input_disabled_link_url">http://code.google.com/p/wifikeyboard/wiki/WiFiKeyboardSettings_sv_SE</string>
+<!-- Please preserve formating of wiki page, "!" sign before WiFiKeyboard disables automatic link creation from WiFiKeyboard because it is WikiWord -->
+<string name="help_wiki_page">
+#summary Howto enable !WiFiKeyboard on device
+
+= Hur man aktiverar !WiFiKeyboard på enheten =
+
+För att aktivera !WiFiKeyboard på din enhet:
+  * Hitta Textinställningar på din enhet och aktivera det:
+     * Tryck Meny på Hemskärmen
+     * Gå till Inställningar -> Nationella inställningar &amp; text
+     * Markera !WiFiKeyboard
+  * Lång tryckning på valfritt textfält och välj \"Inmatningsmetod\" -> !WiFiKeyboard.
+</string>
+<string name="input_from_two_devices_title">Flera inmatningar</string>
+<string name="input_from_two_devices_desc">Att skriva från flera webbläsarfönster stöds ej. Använd ett webbläsarfönster.</string>
+<string name="connection_ok_title">Ansluten</string>
+<string name="connection_ok_desc">Du kan skriva nu.</string>
+<string name="connection_ok_latency">Latens är %d ms</string>
+<string name="input_field_title">Android-inmatning (skriv eller klistra in här):</string>
+<string name="input_field_message">Text som skrivs här går till Android-enheten.</string>
+<string name="keyboard_mode_title">Tangentbordsläge:</string>
+<string name="keyboard_mode_text">Internationellt tangentbord</string>
+<string name="keyboard_mode_keycodes">Spelläge (tangentkoder enbart)</string>
+<string name="keyboard_connection_status_title">Status:</string>
+<string name="keyboard_connection_status_initial_value">Ansluter...</string>
+<string name="special_keys_title">Specialknappar:</string>
+<string name="special_key_shift_mapping">Shift = Shift</string>
+<string name="special_key_alt_mapping">Alt = Alt</string>
+<string name="special_key_arrows_mapping">Pilar = DPAD-pilar</string>
+<string name="special_key_dpad_center_mapping">Insert eller F1 = DPAD Center</string>
+<string name="special_key_menu_mapping">F2 = Meny</string>
+<string name="special_key_back_mapping">Escape = Bakåt</string>
+<string name="special_key_volume_mapping">F9, F10 = Volymkontroll</string>
+<string name="footer_source_code">Källkod tillgänglig (licens GPL v2).</string>
+<string name="footer_author">Skapad av Ivan Volosyuk 2010.</string>
+</resources>
