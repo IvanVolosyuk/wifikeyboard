@@ -57,6 +57,6 @@ Om !WiFiKeyboard te activeren op uw toestel::
 <string name="special_key_menu_mapping">F2 = Menu</string>
 <string name="special_key_back_mapping">Escape = BACK</string>
 <string name="special_key_volume_mapping">F9, F10 = Volume knoppen</string>
-<string name="footer_source_code">Bron code si beschikbaar (licentie GPL v2).</string>
+<string name="footer_source_code">Broncode is beschikbaar (licentie GPL v2).</string>
 <string name="footer_author">Gecreëerd door Ivan Volosyuk in 2010.</string>
 </resources>
